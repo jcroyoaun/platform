@@ -67,8 +67,11 @@ func (app *application) clearSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	// Remove all calculator-related session data
 	app.sessionManager.Remove(r.Context(), "packageInputs")
-	app.sessionManager.Remove(r.Context(), "calculationResults")
+	app.sessionManager.Remove(r.Context(), "comparisonResults")
+	app.sessionManager.Remove(r.Context(), "bestPackage")
+	app.sessionManager.Remove(r.Context(), "fiscalYear")
 	
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

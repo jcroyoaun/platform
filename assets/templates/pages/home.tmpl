@@ -2,6 +2,32 @@
 
 {{define "page:meta"}}
 <meta name="page" content="home">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<style>
+/* Mobile Responsiveness Helper Styles */
+@media (max-width: 1023px) {
+    /* Prevent horizontal scrolling */
+    body, html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    /* Responsive text sizing */
+    h1 {
+        font-size: 1.75rem !important;
+    }
+    
+    p {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Ensure all containers respect viewport */
+    * {
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+    }
+}
+</style>
 {{end}}
 
 {{define "page:main"}}
@@ -72,9 +98,10 @@
             </div>
             <!-- Add Comparison Button (Vertical, Right Side) -->
             <div id="addComparisonButton" style="display: none; position: absolute; left: calc(50% + 390px + 1rem); top: 0; align-items: center; justify-content: center;">
-                <button type="button" onclick="setComparisonMode(true)" style="writing-mode: vertical-rl; text-orientation: mixed; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #3b82f6; padding: 2rem 0.75rem; border: 2px dashed #3b82f6; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;" onmouseover="this.style.background='linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'; this.style.borderColor='#2563eb'; this.style.color='#2563eb'; this.style.borderStyle='solid';" onmouseout="this.style.background='linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.borderStyle='dashed';">
-                    <span style="font-size: 1.5rem;">➕</span>
-                    <span>Comparar con otro paquete de compensación</span>
+                <button type="button" onclick="setComparisonMode(true)" style="writing-mode: vertical-rl; text-orientation: mixed; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #3b82f6; padding: 1.5rem 0.75rem; border: 2px dashed #3b82f6; border-radius: 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; max-height: 420px;" onmouseover="this.style.background='linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'; this.style.borderColor='#2563eb'; this.style.color='#2563eb'; this.style.borderStyle='solid';" onmouseout="this.style.background='linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.borderStyle='dashed';">
+                    <span style="font-size: 1.1rem;">➕</span>
+                    <span class="btn-text-desktop" style="display: inline;">Comparar con otro paquete de compensación</span>
+                    <span class="btn-text-mobile" style="display: none;">Añadir comparación</span>
                 </button>
             </div>
         </div>
@@ -1019,33 +1046,123 @@ function setComparisonMode(isComparing) {
     
     if (!packagesWrapper || !packagesGrid || !package2 || !addButton || !submitButton) return;
     
+    // Detect if we're on mobile
+    const isMobile = window.innerWidth < 1024;
+    
     if (isComparing) {
-        // COMPARISON MODE: Show both packages side-by-side (centered)
+        // COMPARISON MODE
         packagesWrapper.style.position = 'relative';
-        packagesWrapper.style.display = 'flex';
-        packagesWrapper.style.justifyContent = 'center';
+        packagesWrapper.style.display = isMobile ? 'block' : 'flex';
+        packagesWrapper.style.justifyContent = isMobile ? 'flex-start' : 'center';
         packagesWrapper.style.gap = '1rem';
         packagesWrapper.style.alignItems = 'stretch';
-        packagesGrid.style.width = 'auto';
+        packagesWrapper.style.padding = isMobile ? '0 10px' : '0';
+        
+        packagesGrid.style.width = isMobile ? '100%' : 'auto';
         packagesGrid.style.maxWidth = '100%';
         packagesGrid.style.margin = '0';
-        packagesGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
+        packagesGrid.style.gridTemplateColumns = isMobile ? '1fr' : 'repeat(auto-fit, minmax(400px, 1fr))';
+        
         package2.style.display = 'block';
         addButton.style.display = 'none';
         submitButton.textContent = '💰 Comparar Paquetes';
     } else {
-        // SINGLE MODE: Package 1 (780px) centered, button absolutely positioned to the right
-        packagesWrapper.style.position = 'relative';
-        packagesWrapper.style.display = 'block';
-        packagesGrid.style.width = '780px';
-        packagesGrid.style.maxWidth = '780px';
-        packagesGrid.style.margin = '0 auto';
-        packagesGrid.style.gridTemplateColumns = '1fr';
-        package2.style.display = 'none';
-        addButton.style.display = 'flex';
+        // SINGLE MODE
+        if (isMobile) {
+            // MOBILE: Stack vertically, full width
+            packagesWrapper.style.position = 'static';
+            packagesWrapper.style.display = 'block';
+            packagesWrapper.style.padding = '0 10px';
+            packagesWrapper.style.marginBottom = '2rem';
+            
+            packagesGrid.style.width = '100%';
+            packagesGrid.style.maxWidth = '100%';
+            packagesGrid.style.margin = '0';
+            packagesGrid.style.gridTemplateColumns = '1fr';
+            
+            package2.style.display = 'none';
+            
+            // Button below, horizontal
+            addButton.style.position = 'static';
+            addButton.style.left = 'auto';
+            addButton.style.top = 'auto';
+            addButton.style.display = 'flex';
+            addButton.style.width = '100%';
+            addButton.style.marginTop = '1rem';
+            addButton.style.justifyContent = 'center';
+            
+            // Make button text horizontal
+            const addButtonEl = addButton.querySelector('button');
+            if (addButtonEl) {
+                addButtonEl.style.writingMode = 'horizontal-tb';
+                addButtonEl.style.width = 'auto';
+                addButtonEl.style.maxWidth = '280px';
+                addButtonEl.style.padding = '0.875rem 1.5rem';
+                addButtonEl.style.height = 'auto';
+                addButtonEl.style.fontSize = '0.85rem';
+                
+                // Show mobile text, hide desktop text
+                const desktopText = addButtonEl.querySelector('.btn-text-desktop');
+                const mobileText = addButtonEl.querySelector('.btn-text-mobile');
+                if (desktopText) desktopText.style.display = 'none';
+                if (mobileText) mobileText.style.display = 'inline';
+            }
+        } else {
+            // DESKTOP: Package 1 centered, button on right (vertical)
+            packagesWrapper.style.position = 'relative';
+            packagesWrapper.style.display = 'block';
+            packagesWrapper.style.padding = '0';
+            
+            packagesGrid.style.width = '780px';
+            packagesGrid.style.maxWidth = '780px';
+            packagesGrid.style.margin = '0 auto';
+            packagesGrid.style.gridTemplateColumns = '1fr';
+            
+            package2.style.display = 'none';
+            
+            // Button on right, vertical
+            addButton.style.position = 'absolute';
+            addButton.style.left = 'calc(50% + 390px + 1rem)';
+            addButton.style.top = '0';
+            addButton.style.display = 'flex';
+            
+            // Make button text vertical
+            const addButtonEl = addButton.querySelector('button');
+            if (addButtonEl) {
+                addButtonEl.style.writingMode = 'vertical-rl';
+                addButtonEl.style.width = 'auto';
+                addButtonEl.style.maxWidth = 'none';
+                addButtonEl.style.padding = '1.5rem 0.75rem';
+                addButtonEl.style.height = 'auto';
+                addButtonEl.style.maxHeight = '420px';
+                addButtonEl.style.fontSize = '0.7rem';
+                
+                // Show desktop text, hide mobile text
+                const desktopText = addButtonEl.querySelector('.btn-text-desktop');
+                const mobileText = addButtonEl.querySelector('.btn-text-mobile');
+                if (desktopText) desktopText.style.display = 'inline';
+                if (mobileText) mobileText.style.display = 'none';
+            }
+        }
+        
         submitButton.textContent = '💰 Calcular Compensación';
     }
 }
+
+// Re-run on window resize to adjust layout
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+        // Re-check if we're in comparison mode
+        const package2 = document.getElementById('package-2');
+        if (package2 && package2.style.display === 'block') {
+            setComparisonMode(true);
+        } else {
+            setComparisonMode(false);
+        }
+    }, 250);
+});
 
 function initializeComparisonMode() {
     // Check if we have saved inputs for Package 2 (server-side persistence)
