@@ -1,0 +1,10 @@
+{{define "page:title"}}Bad request{{end}}
+
+{{define "page:meta"}}
+<meta name="page" content="errors/400">
+{{end}}
+
+{{define "page:main"}}
+<h1>Bad request</h1>
+<p>{{.ErrorMessage}}</p>
+{{end}}

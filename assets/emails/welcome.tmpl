@@ -1,0 +1,208 @@
+{{define "subject"}}¡Bienvenido a TotalComp MX! 🚀{{end}}
+
+{{define "plainBody"}}
+¡Hola!
+
+Bienvenido a TotalComp MX, la API de nómina para developers en México.
+
+Tu cuenta ha sido creada exitosamente. Ya puedes acceder a tu dashboard de desarrollador en:
+
+https://totalcomp.mx/account/developer
+
+VERIFICA TU EMAIL PARA ACCESO COMPLETO
+
+Para desbloquear el acceso completo a la API (100 llamadas/mes), por favor verifica tu email haciendo clic en el siguiente enlace:
+
+https://totalcomp.mx/verify-email/{{.VerificationToken}}
+
+IMPORTANTE: Sin verificar tu email, tu cuenta está limitada a 10 llamadas/día para probar la API.
+
+¿QUÉ PUEDES HACER AHORA?
+
+1. Genera tu API Key en el dashboard
+2. Lee la documentación en https://totalcomp.mx/developers
+3. Haz tu primera llamada de prueba
+4. Verifica tu email para desbloquear el plan Hobby (100 llamadas/mes)
+
+¿TIENES PREGUNTAS?
+
+Contáctanos en hola@totalcomp.mx
+
+¡Gracias por usar TotalComp MX!
+
+---
+TotalComp MX - Simulador de Nómina para Developers
+https://totalcomp.mx
+{{end}}
+
+{{define "htmlBody"}}
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 3px solid #10b981;
+      }
+      .logo {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      .header h1 {
+        color: white;
+        font-size: 1.75rem;
+        margin: 0;
+      }
+      .header p {
+        color: #94a3b8;
+        font-size: 0.875rem;
+        margin: 0.5rem 0 0 0;
+      }
+      .content {
+        padding: 2rem;
+        color: #334155;
+        line-height: 1.6;
+      }
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        text-decoration: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        margin: 1rem 0;
+      }
+      .warning-box {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+      }
+      .warning-box strong {
+        color: #92400e;
+      }
+      .info-box {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+      }
+      .steps {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+      }
+      .steps ol {
+        margin: 0;
+        padding-left: 1.5rem;
+      }
+      .steps li {
+        margin-bottom: 0.5rem;
+      }
+      .footer {
+        background: #f1f5f9;
+        padding: 1.5rem;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+      }
+      .footer a {
+        color: #10b981;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="logo">💰</div>
+        <h1>TotalComp MX</h1>
+        <p>API de Nómina para Developers</p>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2 style="color: #0f172a; margin-top: 0;">¡Bienvenido! 🚀</h2>
+        
+        <p>Tu cuenta ha sido creada exitosamente. Ya puedes acceder a tu dashboard de desarrollador:</p>
+        
+        <p style="text-align: center;">
+          <a href="https://totalcomp.mx/account/developer" class="cta-button">
+            🔑 Ir a Mi Dashboard
+          </a>
+        </p>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+          <strong>⚡ VERIFICA TU EMAIL PARA ACCESO COMPLETO</strong><br>
+          Para desbloquear el acceso completo a la API (100 llamadas/mes), por favor verifica tu email:
+        </div>
+
+        <p style="text-align: center;">
+          <a href="https://totalcomp.mx/verify-email/{{.VerificationToken}}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; text-decoration: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 700; margin: 1rem 0;">
+            ✅ Verificar Email Ahora
+          </a>
+        </p>
+
+        <div class="info-box">
+          <strong>📊 Tu Plan Actual:</strong><br>
+          Sin verificar: <strong>10 llamadas/día</strong> (suficiente para probar)<br>
+          Después de verificar: <strong>100 llamadas/mes</strong> (Plan Hobby gratis)
+        </div>
+
+        <!-- Steps -->
+        <div class="steps">
+          <h3 style="margin-top: 0; color: #0f172a;">🎯 ¿Qué puedes hacer ahora?</h3>
+          <ol>
+            <li><strong>Genera tu API Key</strong> en el dashboard</li>
+            <li><strong>Lee la documentación</strong> en <a href="https://totalcomp.mx/developers">totalcomp.mx/developers</a></li>
+            <li><strong>Haz tu primera llamada</strong> de prueba (hasta 10/día sin verificar)</li>
+            <li><strong>Verifica tu email</strong> para desbloquear 100 llamadas/mes</li>
+          </ol>
+        </div>
+
+        <p><strong>¿Tienes preguntas?</strong></p>
+        <p>Contáctanos en <a href="mailto:hola@totalcomp.mx" style="color: #10b981;">hola@totalcomp.mx</a></p>
+
+        <p style="margin-top: 2rem;">
+          ¡Gracias por usar TotalComp MX! 💚
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          <strong>TotalComp MX</strong> - Simulador de Nómina para Developers<br>
+          <a href="https://totalcomp.mx">totalcomp.mx</a>
+        </p>
+        <p style="margin-top: 1rem;">
+          <a href="https://totalcomp.mx/privacy">Aviso de Privacidad</a> •
+          <a href="https://totalcomp.mx/terms">Términos y Condiciones</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}
+

@@ -1,0 +1,84 @@
+{{define "page:title"}}Email Verificado | TotalComp MX{{end}}
+
+{{define "page:main"}}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box;">
+    <div style="width: 100%; max-width: 500px;">
+        <!-- Success Icon -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); margin-bottom: 1rem;">
+                <span style="font-size: 3rem;">✅</span>
+            </div>
+            <h1 style="color: white; font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                ¡Email Verificado!
+            </h1>
+            <p style="color: #94a3b8; font-size: 1rem; margin: 0;">
+                Tu cuenta ha sido activada completamente
+            </p>
+        </div>
+
+        <!-- Confirmation Card -->
+        <div style="background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155;">
+            <p style="color: #f8fafc; font-size: 0.875rem; line-height: 1.8; margin: 0 0 1.5rem 0; text-align: center;">
+                Tu email ha sido verificado exitosamente. Ahora tienes acceso completo a la API.
+            </p>
+
+            <!-- Success Box -->
+            <div style="background: #ecfdf5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 1.5rem;">
+                <p style="color: #065f46; font-size: 0.875rem; margin: 0 0 0.75rem 0; line-height: 1.6; font-weight: 600;">
+                    🎉 Plan Hobby Desbloqueado
+                </p>
+                <p style="color: #047857; font-size: 0.75rem; margin: 0; line-height: 1.6;">
+                    Límite anterior: <strong>10 llamadas/día</strong> ❌<br>
+                    Nuevo límite: <strong>100 llamadas/mes</strong> ✅
+                </p>
+            </div>
+
+            <!-- Features List -->
+            <div style="background: #0f172a; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h3 style="color: #f8fafc; font-size: 0.875rem; margin: 0 0 1rem 0; font-weight: 600;">
+                    ✨ Qué puedes hacer ahora:
+                </h3>
+                <ul style="margin: 0; padding-left: 1.5rem; color: #94a3b8; font-size: 0.75rem; line-height: 1.8;">
+                    <li>Hacer hasta <strong style="color: #10b981;">100 llamadas API</strong> por mes</li>
+                    <li>Acceso completo a todos los endpoints</li>
+                    <li>Soporte técnico por email</li>
+                    <li>Actualización 2025 (ISR, IMSS, UMA)</li>
+                </ul>
+            </div>
+
+            <!-- CTA Button -->
+            <a href="/account/developer" style="display: block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; text-align: center; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3); transition: transform 0.2s, box-shadow 0.2s;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 10px rgba(99, 102, 241, 0.4)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(99, 102, 241, 0.3)'">
+                🔑 Ir a Mi Dashboard
+            </a>
+
+            <!-- Divider -->
+            <div style="margin: 1.5rem 0; text-align: center; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #334155;"></div>
+                <span style="position: relative; background: #1e293b; padding: 0 1rem; color: #64748b; font-size: 0.75rem; font-weight: 600;">
+                    O
+                </span>
+            </div>
+
+            <!-- Secondary Action -->
+            <div style="text-align: center;">
+                <a href="/developers" style="color: #94a3b8; text-decoration: none; font-size: 0.875rem; transition: color 0.2s;"
+                   onmouseover="this.style.color='#f8fafc'; this.style.textDecoration='underline'"
+                   onmouseout="this.style.color='#94a3b8'; this.style.textDecoration='none'">
+                    📚 Ver Documentación de API
+                </a>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="color: #64748b; font-size: 0.75rem; line-height: 1.6;">
+                ¿Necesitas más llamadas?<br>
+                Contáctanos en <a href="mailto:hola@totalcomp.mx" style="color: #10b981; text-decoration: underline;">hola@totalcomp.mx</a>
+            </p>
+        </div>
+    </div>
+</div>
+{{end}}
+

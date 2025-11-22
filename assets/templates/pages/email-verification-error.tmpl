@@ -1,0 +1,89 @@
+{{define "page:title"}}Error de Verificación | TotalComp MX{{end}}
+
+{{define "page:main"}}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box;">
+    <div style="width: 100%; max-width: 500px;">
+        <!-- Error Icon -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3); margin-bottom: 1rem;">
+                <span style="font-size: 3rem;">⚠️</span>
+            </div>
+            <h1 style="color: white; font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                Enlace Inválido
+            </h1>
+            <p style="color: #94a3b8; font-size: 1rem; margin: 0;">
+                No pudimos verificar tu email
+            </p>
+        </div>
+
+        <!-- Error Card -->
+        <div style="background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155;">
+            <!-- Error Message -->
+            <div style="background: #fee2e2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 1.5rem;">
+                <p style="color: #991b1b; font-size: 0.875rem; margin: 0; line-height: 1.6; font-weight: 600;">
+                    {{.Message}}
+                </p>
+            </div>
+
+            <p style="color: #f8fafc; font-size: 0.875rem; line-height: 1.8; margin: 0 0 1.5rem 0;">
+                Esto puede ocurrir si:
+            </p>
+
+            <!-- Reasons List -->
+            <ul style="color: #94a3b8; font-size: 0.875rem; line-height: 1.8; margin: 0 0 1.5rem 0; padding-left: 1.5rem;">
+                <li>El enlace ya fue usado anteriormente</li>
+                <li>El enlace expiró (válido por 24 horas)</li>
+                <li>El enlace fue copiado incorrectamente</li>
+            </ul>
+
+            <!-- Solution Box -->
+            <div style="background: #dbeafe; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 1.5rem;">
+                <p style="color: #1e40af; font-size: 0.875rem; margin: 0 0 0.75rem 0; font-weight: 600;">
+                    💡 Solución
+                </p>
+                <p style="color: #1e40af; font-size: 0.75rem; margin: 0; line-height: 1.6;">
+                    Puedes solicitar un nuevo enlace de verificación desde tu dashboard. Inicia sesión y te enviaremos un nuevo email.
+                </p>
+            </div>
+
+            <!-- CTA Buttons -->
+            <a href="/login" style="display: block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; text-align: center; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3); transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 1rem;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 10px rgba(99, 102, 241, 0.4)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(99, 102, 241, 0.3)'">
+                🔑 Iniciar Sesión
+            </a>
+
+            <!-- Divider -->
+            <div style="margin: 1.5rem 0; text-align: center; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #334155;"></div>
+                <span style="position: relative; background: #1e293b; padding: 0 1rem; color: #64748b; font-size: 0.75rem; font-weight: 600;">
+                    O
+                </span>
+            </div>
+
+            <!-- Secondary Actions -->
+            <div style="text-align: center; display: flex; gap: 1rem; flex-direction: column;">
+                <a href="/signup" style="color: #10b981; text-decoration: none; font-size: 0.875rem; font-weight: 600; transition: color 0.2s;"
+                   onmouseover="this.style.color='#059669'; this.style.textDecoration='underline'"
+                   onmouseout="this.style.color='#10b981'; this.style.textDecoration='none'">
+                    ¿No tienes cuenta? Regístrate gratis
+                </a>
+                <a href="/" style="color: #94a3b8; text-decoration: none; font-size: 0.875rem; transition: color 0.2s;"
+                   onmouseover="this.style.color='#f8fafc'"
+                   onmouseout="this.style.color='#94a3b8'">
+                    ← Volver al inicio
+                </a>
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="color: #64748b; font-size: 0.75rem; line-height: 1.6;">
+                ¿Sigues teniendo problemas?<br>
+                Contáctanos en <a href="mailto:hola@totalcomp.mx" style="color: #10b981; text-decoration: underline;">hola@totalcomp.mx</a>
+            </p>
+        </div>
+    </div>
+</div>
+{{end}}
+

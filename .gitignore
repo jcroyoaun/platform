@@ -1,0 +1,49 @@
+*.md
+# --- Go Build Artifacts ---
+/bin/
+/dist/
+*.exe
+*.test
+*.prof
+*.out
+
+# --- Dependencies (if you vendor) ---
+# vendor/
+
+# --- Environment & Secrets (CRITICAL) ---
+.env
+.env.local
+*.pem
+*.key
+
+# --- TLS Certificates (Auto-HTTPS cache) ---
+# Your code in server.go saves Let's Encrypt certs here
+certs/
+/tls/
+
+# --- IDE & Editor Configs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Logs & Temp Files ---
+*.log
+build-errors.log
+tmp/
+/tmp/
+
+# --- Testing & Coverage ---
+coverage.txt
+coverage.out
+profile.out
+
+# --- Live Reload (Air) ---
+# If you use cosmtrek/air for live reloading, it creates this directory
+tmp/
+runner-build

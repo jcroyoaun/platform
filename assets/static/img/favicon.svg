@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (Dark Slate) -->
+  <rect width="512" height="512" rx="96" fill="#1E293B"/>
+  
+  <!-- Stacked Coins Icon (Emerald) -->
+  <!-- Bottom Coin -->
+  <ellipse cx="256" cy="360" rx="120" ry="32" fill="#10B981" opacity="0.3"/>
+  <ellipse cx="256" cy="352" rx="120" ry="32" fill="#10B981"/>
+  <rect x="136" y="320" width="240" height="32" fill="#10B981"/>
+  <ellipse cx="256" cy="320" rx="120" ry="32" fill="#059669"/>
+  
+  <!-- Middle Coin -->
+  <ellipse cx="256" cy="280" rx="100" ry="28" fill="#10B981" opacity="0.3"/>
+  <ellipse cx="256" cy="272" rx="100" ry="28" fill="#10B981"/>
+  <rect x="156" y="244" width="200" height="28" fill="#10B981"/>
+  <ellipse cx="256" cy="244" rx="100" ry="28" fill="#059669"/>
+  
+  <!-- Top Coin -->
+  <ellipse cx="256" cy="204" rx="80" ry="24" fill="#10B981" opacity="0.3"/>
+  <ellipse cx="256" cy="196" rx="80" ry="24" fill="#10B981"/>
+  <rect x="176" y="172" width="160" height="24" fill="#10B981"/>
+  <ellipse cx="256" cy="172" rx="80" ry="24" fill="#059669"/>
+  
+  <!-- Ascending Arrow (Success Indicator) -->
+  <path d="M 320 160 L 380 100 L 440 160" stroke="#10B981" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="380" y1="100" x2="380" y2="200" stroke="#10B981" stroke-width="24" stroke-linecap="round"/>
+</svg>
+

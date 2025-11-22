@@ -1,0 +1,1405 @@
+{{define "page:title"}}TotalComp MX | Comparador de Compensación México 2025{{end}}
+
+{{define "page:meta"}}
+<meta name="page" content="home">
+{{end}}
+
+{{define "page:main"}}
+<div style="width: 100%; padding: 1.5rem; box-sizing: border-box;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; color: #0f172a; margin-bottom: 0.75rem; margin-top: 0; font-weight: 700;">
+            💰 Calculadora de Sueldo & Comparador
+        </h1>
+        <p style="font-size: 1.25rem; color: #10b981; margin: 0 0 0.5rem 0; font-weight: 600;">
+            Tu salario real, sin letras chiquitas
+        </p>
+        <p style="font-size: 0.875rem; color: #6366f1; margin: 0 0 0.5rem 0; font-weight: 500; font-style: italic;">
+            Ideal para Ingenieros, Freelancers y Contractors.
+        </p>
+        <p style="font-size: 0.9rem; color: #64748b; margin: 0;">
+            Compara ofertas laborales lado a lado • Sueldos y Salarios vs RESICO • ISR 2025 • IMSS • UMA • Prestaciones
+        </p>
+    </div>
+
+    <!-- Comparison Container -->
+    <form action="/" method="POST" novalidate>
+        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+        
+        {{if .PackageInputs}}
+        <!-- Hidden inputs to preserve form values -->
+        {{range $idx, $pkg := .PackageInputs}}
+        <input type="hidden" id="saved-pkg-{{$idx}}-name" value="{{$pkg.Name}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-regime" value="{{$pkg.Regime}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-currency" value="{{$pkg.Currency}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-exchange-rate" value="{{$pkg.ExchangeRate}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-payment-freq" value="{{$pkg.PaymentFrequency}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-hours" value="{{$pkg.HoursPerWeek}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-salary" value="{{$pkg.GrossMonthlySalary}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-aguinaldo" value="{{$pkg.HasAguinaldo}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-aguinaldo-days" value="{{$pkg.AguinaldoDays}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-vales" value="{{$pkg.HasValesDespensa}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-vales-amount" value="{{$pkg.ValesDespensaAmount}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-prima" value="{{$pkg.HasPrimaVacacional}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-vacation-days" value="{{$pkg.VacationDays}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-prima-percent" value="{{$pkg.PrimaVacacionalPercent}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-fondo" value="{{$pkg.HasFondoAhorro}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-fondo-percent" value="{{$pkg.FondoAhorroPercent}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-unpaid-vacation" value="{{$pkg.UnpaidVacationDays}}">
+        <!-- Equity -->
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-equity" value="{{$pkg.HasEquity}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-initial-equity" value="{{$pkg.InitialEquityUSD}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-has-refreshers" value="{{$pkg.HasRefreshers}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-refresher-min" value="{{$pkg.RefresherMinUSD}}">
+        <input type="hidden" id="saved-pkg-{{$idx}}-refresher-max" value="{{$pkg.RefresherMaxUSD}}">
+        <!-- Otras prestaciones -->
+        {{range $jdx, $benefit := $pkg.OtherBenefits}}
+        <input type="hidden" class="saved-other-benefit-{{$idx}}" data-name="{{$benefit.Name}}" data-amount="{{$benefit.Amount}}" data-taxfree="{{$benefit.TaxFree}}" data-currency="{{$benefit.Currency}}" data-cadence="{{$benefit.Cadence}}">
+        {{end}}
+        {{end}}
+        {{end}}
+        
+        <!-- Packages Wrapper (Grid + Add Button) -->
+        <div id="packagesWrapper" style="display: flex; gap: 1rem; justify-content: center; align-items: stretch; margin-bottom: 2rem;">
+            <div id="packagesGrid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 600px;">
+            
+                <!-- Package 1 -->
+            <div id="package-1" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 3px solid #3b82f6;" data-package-index="0">
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                    <input type="text" name="PackageName[]" placeholder="Nombre del paquete (ej: Oferta Zillow)" value="Paquete 1" class="package-name-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; font-weight: 600; color: #1e293b;">
+                </div>
+
+                <!-- Regime -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        📋 Régimen Fiscal
+                    </label>
+                    <select name="Regime[]" class="regime-select" onchange="toggleRegime(this, 0)" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+                        <option value="sueldos_salarios">Sueldos y Salarios</option>
+                        <option value="resico">RESICO</option>
+                    </select>
+                </div>
+
+
+                <!-- Currency Selection (only for RESICO) -->
+                <div class="currency-selection-0" style="display: none; margin-bottom: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                💵 Moneda
+                            </label>
+                            <select name="Currency[]" onchange="toggleExchangeRate(this, 0)" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+                                <option value="MXN">MXN (Pesos)</option>
+                                <option value="USD">USD (Dólares)</option>
+                            </select>
+                        </div>
+                        <div class="exchange-rate-input-0" style="display: none;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;" title="Tipo de cambio USD/MXN actualizado diariamente desde Banxico">
+                                💱 Tipo de Cambio
+                            </label>
+                            <input type="text" name="ExchangeRate[]" placeholder="{{if .FiscalYear}}{{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}20.00{{end}}" value="{{if .FiscalYear}}{{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}{{end}}" class="money-input" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                            <div style="margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
+                                <div style="font-size: 0.7rem; color: #1e40af; line-height: 1.4;">
+                                    💡 <strong>Tipo de cambio oficial Banxico:</strong> {{if .FiscalYear}}${{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}$20.00{{end}} MXN/USD
+                                    <div style="margin-top: 0.25rem; font-size: 0.65rem; color: #64748b;">Actualizado automáticamente a las 14:00 CST</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary with Frequency -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="salary-label-0" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        💰 Salario Bruto
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+                        <input type="text" name="GrossMonthlySalary[]" placeholder="Ej: 12,000" class="salary-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                        <select name="PaymentFrequency[]" class="payment-frequency-select-0" onchange="toggleSalaryLabel(this, 0)" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.75rem; background: white; cursor: pointer;">
+                            <option value="monthly">Mensual</option>
+                            <option value="biweekly">Quincenal</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="daily" style="display: none;" disabled>Diario</option>
+                            <option value="hourly" style="display: none;" disabled>Por Hora</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Hours per week (only for hourly) -->
+                <div class="hours-per-week-0" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        ⏰ Horas por Semana
+                    </label>
+                    <input type="number" name="HoursPerWeek[]" value="40" min="1" max="168" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                </div>
+
+                <!-- Unpaid Vacation Days (RESICO only) -->
+                <div class="unpaid-vacation-0" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        📅 Días de Descanso (No pagados)
+                    </label>
+                    <input type="number" name="UnpaidVacationDays[]" value="0" min="0" max="365" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+                        <em>Como RESICO, si no trabajas, no cobras. Esto ajustará tu ingreso anual real.</em>
+                    </p>
+                </div>
+
+                <!-- Benefits Section (for Sueldos) -->
+                <div class="benefits-section-0" style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">🎁 Prestaciones</div>
+                    
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasAguinaldo[]" value="0" checked style="margin-right: 0.5rem;">
+                        Aguinaldo <input type="number" name="AguinaldoDays[]" value="15" min="15" max="30" style="width: 60px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días
+                    </label>
+
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasValesDespensa[]" value="0" checked style="margin-right: 0.5rem;">
+                        Vales de despensa $<input type="text" name="ValesDespensaAmount[]" value="3439" class="money-input" placeholder="3,439" data-max="3439" style="width: 80px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> /mes
+                    </label>
+
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasPrimaVacacional[]" value="0" checked style="margin-right: 0.5rem;">
+                        Prima Vacacional: <input type="number" name="VacationDays[]" value="12" min="12" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días @ <input type="number" name="PrimaVacacionalPercent[]" value="25" min="25" style="width: 50px; padding: 0.25rem; margin-left: 0.25rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+                    </label>
+
+                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasFondoAhorro[]" value="0" checked style="margin-right: 0.5rem;">
+                        Fondo de Ahorro <input type="number" name="FondoAhorroPercent[]" value="13" min="1" max="13" step="1" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+                    </label>
+
+                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasInfonavitCredit[]" value="0" style="margin-right: 0.5rem;">
+                        🏠 Infonavit (Aportación Patronal 5%)
+                    </label>
+                </div>
+
+                <!-- Otras Prestaciones -->
+                <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-size: 0.875rem; font-weight: 600; color: #92400e;">✨ Otras Prestaciones</span>
+                        <button type="button" onclick="addBenefit(0)" style="background: #059669; color: white; padding: 0.25rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">+ Agregar</button>
+                    </div>
+                    <div id="otherBenefits-0" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Dynamic benefits will be added here -->
+                    </div>
+                </div>
+
+                <div style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; font-size: 0.75rem; color: #1e40af;">
+                    <strong>💡 Tip:</strong> Otras prestaciones pueden incluir apoyo para internet, luz, gasolina, SGMM, etc.
+                </div>
+
+                <!-- Equity / RSUs Section -->
+                <div style="margin-top: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.75rem;">
+                        <input 
+                            type="checkbox" 
+                            name="HasEquity[]"
+                            value="0"
+                            class="equity-toggle-checkbox"
+                            data-package-index="0"
+                            style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                            📊 ¿Incluir Equity / RSUs?
+                        </span>
+                    </label>
+                    
+                    <div class="equity-section-0" style="display: none; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0;">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+                            📊 Equity / RSUs
+                        </h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                💰 Initial Equity Grant (USD)
+                            </label>
+                            <input 
+                                type="text" 
+                                name="InitialEquityUSD[]" 
+                                placeholder="Ej: 30000" 
+                                class="money-input" 
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                        </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input 
+                                type="checkbox" 
+                                name="HasRefreshers[]" 
+                                value="0"
+                                class="refresher-checkbox"
+                                style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                                ✨ Annual Refreshers?
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="refresher-fields-0" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                    Min Refresher (USD/año)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="RefresherMinUSD[]" 
+                                    placeholder="8000"
+                                    class="money-input" 
+                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                    Max Refresher (USD/año)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="RefresherMaxUSD[]" 
+                                    placeholder="12000"
+                                    class="money-input" 
+                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 0.75rem; padding: 0.75rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.75rem; color: #1e40af;">
+                            💡 Los refreshers típicamente varían según performance (e.g., $8k-12k USD/año)
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package 2 -->
+            <div id="package-2" style="display: none; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 3px solid #8b5cf6; position: relative;" data-package-index="1">
+                <!-- Remove Button -->
+                <button type="button" onclick="setComparisonMode(false)" style="position: absolute; top: 1rem; right: 1rem; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s ease; z-index: 10;" title="Quitar comparación" onmouseover="this.style.background='#dc2626'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ef4444'; this.style.transform='scale(1)';">
+                    🗑️
+                </button>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                    <input type="text" name="PackageName[]" placeholder="Nombre del paquete (ej: Tu trabajo actual)" value="Paquete 2" class="package-name-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; font-weight: 600; color: #1e293b;">
+                </div>
+
+                <!-- Regime -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        📋 Régimen Fiscal
+                    </label>
+                    <select name="Regime[]" class="regime-select" onchange="toggleRegime(this, 1)" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+                        <option value="sueldos_salarios">Sueldos y Salarios</option>
+                        <option value="resico">RESICO</option>
+                    </select>
+                </div>
+
+                <!-- Currency Selection (only for RESICO) -->
+                <div class="currency-selection-1" style="display: none; margin-bottom: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                💵 Moneda
+                            </label>
+                            <select name="Currency[]" onchange="toggleExchangeRate(this, 1)" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+                                <option value="MXN">MXN (Pesos)</option>
+                                <option value="USD">USD (Dólares)</option>
+                            </select>
+                        </div>
+                        <div class="exchange-rate-input-1" style="display: none;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;" title="Tipo de cambio USD/MXN actualizado diariamente desde Banxico">
+                                💱 Tipo de Cambio
+                            </label>
+                            <input type="text" name="ExchangeRate[]" placeholder="{{if .FiscalYear}}{{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}20.00{{end}}" value="{{if .FiscalYear}}{{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}{{end}}" class="money-input" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                            <div style="margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
+                                <div style="font-size: 0.7rem; color: #1e40af; line-height: 1.4;">
+                                    💡 <strong>Tipo de cambio oficial Banxico:</strong> {{if .FiscalYear}}${{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}$20.00{{end}} MXN/USD
+                                    <div style="margin-top: 0.25rem; font-size: 0.65rem; color: #64748b;">Actualizado automáticamente a las 14:00 CST</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary with Frequency -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="salary-label-1" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        💰 Salario Bruto
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+                        <input type="text" name="GrossMonthlySalary[]" placeholder="Ej: 12,000" class="salary-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                        <select name="PaymentFrequency[]" class="payment-frequency-select-1" onchange="toggleSalaryLabel(this, 1)" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.75rem; background: white; cursor: pointer;">
+                            <option value="monthly">Mensual</option>
+                            <option value="biweekly">Quincenal</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="daily" style="display: none;" disabled>Diario</option>
+                            <option value="hourly" style="display: none;" disabled>Por Hora</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Hours per week (only for hourly) -->
+                <div class="hours-per-week-1" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        ⏰ Horas por Semana
+                    </label>
+                    <input type="number" name="HoursPerWeek[]" value="40" min="1" max="168" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                </div>
+
+                <!-- Unpaid Vacation Days (RESICO only) -->
+                <div class="unpaid-vacation-1" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        📅 Días de Descanso (No pagados)
+                    </label>
+                    <input type="number" name="UnpaidVacationDays[]" value="0" min="0" max="365" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+                        <em>Como RESICO, si no trabajas, no cobras. Esto ajustará tu ingreso anual real.</em>
+                    </p>
+                </div>
+
+                <!-- Benefits Section (for Sueldos) -->
+                <div class="benefits-section-1" style="display: none; background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">🎁 Prestaciones</div>
+                    
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasAguinaldo[]" value="1" style="margin-right: 0.5rem;">
+                        Aguinaldo <input type="number" name="AguinaldoDays[]" value="15" min="15" max="30" style="width: 60px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días
+                    </label>
+
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasValesDespensa[]" value="1" style="margin-right: 0.5rem;">
+                        Vales de despensa $<input type="text" name="ValesDespensaAmount[]" value="3439" class="money-input" placeholder="3,439" data-max="3439" style="width: 80px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> /mes
+                    </label>
+
+                    <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasPrimaVacacional[]" value="1" style="margin-right: 0.5rem;">
+                        Prima Vacacional: <input type="number" name="VacationDays[]" value="12" min="12" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días @ <input type="number" name="PrimaVacacionalPercent[]" value="25" min="25" style="width: 50px; padding: 0.25rem; margin-left: 0.25rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+                    </label>
+
+                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasFondoAhorro[]" value="1" style="margin-right: 0.5rem;">
+                        Fondo de Ahorro <input type="number" name="FondoAhorroPercent[]" value="13" min="1" max="13" step="1" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+                    </label>
+
+                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" name="HasInfonavitCredit[]" value="1" style="margin-right: 0.5rem;">
+                        🏠 Infonavit (Aportación Patronal 5%)
+                    </label>
+                </div>
+
+                <!-- Otras Prestaciones -->
+                <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-size: 0.875rem; font-weight: 600; color: #92400e;">✨ Otras Prestaciones</span>
+                        <button type="button" onclick="addBenefit(1)" style="background: #059669; color: white; padding: 0.25rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">+ Agregar</button>
+                    </div>
+                    <div id="otherBenefits-1" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Dynamic benefits will be added here -->
+                    </div>
+                </div>
+
+                <div style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; font-size: 0.75rem; color: #1e40af;">
+                    <strong>💡 Tip:</strong> Otras prestaciones pueden incluir apoyo para internet, luz, gasolina, SGMM, etc.
+                </div>
+
+                <!-- Equity / RSUs Section -->
+                <div style="margin-top: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.75rem;">
+                        <input 
+                            type="checkbox" 
+                            name="HasEquity[]"
+                            value="1"
+                            class="equity-toggle-checkbox"
+                            data-package-index="1"
+                            style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                            📊 ¿Incluir Equity / RSUs?
+                        </span>
+                    </label>
+                    
+                    <div class="equity-section-1" style="display: none; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0;">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+                            📊 Equity / RSUs
+                        </h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                💰 Initial Equity Grant (USD)
+                            </label>
+                            <input 
+                                type="text" 
+                                name="InitialEquityUSD[]" 
+                                placeholder="Ej: 30000" 
+                                class="money-input" 
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                        </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input 
+                                type="checkbox" 
+                                name="HasRefreshers[]" 
+                                value="1"
+                                class="refresher-checkbox"
+                                style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                                ✨ Annual Refreshers?
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="refresher-fields-1" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                    Min Refresher (USD/año)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="RefresherMinUSD[]" 
+                                    placeholder="8000"
+                                    class="money-input" 
+                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                                    Max Refresher (USD/año)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="RefresherMaxUSD[]" 
+                                    placeholder="12000"
+                                    class="money-input" 
+                                    style="width: 100%; padding: 0.75rem; border-radius: 8px; font-size: 0.875rem;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 0.75rem; padding: 0.75rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.75rem; color: #1e40af;">
+                            💡 Los refreshers típicamente varían según performance (e.g., $8k-12k USD/año)
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+            
+            <!-- Add Comparison Button (Vertical, Right Side) -->
+            <div id="addComparisonButton" style="display: none; align-items: center; justify-content: center;">
+                <button type="button" onclick="setComparisonMode(true)" style="writing-mode: vertical-rl; text-orientation: mixed; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #3b82f6; padding: 2rem 0.75rem; border: 2px dashed #3b82f6; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;" onmouseover="this.style.background='linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'; this.style.borderColor='#2563eb'; this.style.color='#2563eb'; this.style.borderStyle='solid';" onmouseout="this.style.background='linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'; this.style.borderColor='#3b82f6'; this.style.color='#3b82f6'; this.style.borderStyle='dashed';">
+                    <span style="font-size: 1.5rem;">➕</span>
+                    <span>Comparar con otro paquete de compensación</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Validation Errors -->
+        {{if .Form.Validator.FieldErrors.GrossMonthlySalary}}
+        <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.5rem;">⚠️</span>
+                <div>
+                    <div style="font-weight: 700; color: #991b1b; margin-bottom: 0.25rem;">Error de validación</div>
+                    <div style="color: #991b1b;">{{.Form.Validator.FieldErrors.GrossMonthlySalary}}</div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+
+        <!-- Submit Button -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button id="submitButton" type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1rem 3rem; border: none; border-radius: 8px; font-size: 1.25rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3); transition: transform 0.2s, box-shadow 0.2s; margin-right: 1rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.3)'">
+                💰 Calcular Compensación
+            </button>
+            <button type="button" onclick="clearAllInputs()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(239, 68, 68, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(239, 68, 68, 0.3)'">
+                🗑️ Limpiar Todo
+            </button>
+        </div>
+    </form>
+
+    <!-- Results Section -->
+    {{if .Results}}
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="text-align: center; color: #059669; margin-bottom: 2rem; font-size: 2rem;">
+            📊 Comparación de Resultados
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+            
+            {{range $idx, $result := .Results}}
+            <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="color: #2563eb; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
+                    {{if $result.PackageName}}{{$result.PackageName}}{{else}}Paquete {{add $idx 1}}{{end}}
+                </h3>
+
+                <!-- Key Metrics -->
+                <div style="background: #eff6ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                    <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">💰 Neto Mensual</div>
+                    <div style="font-size: 1.75rem; font-weight: 700; color: #2563eb;">
+                        ${{formatFloat $result.NetSalary 2}}
+                    </div>
+                </div>
+
+                <div style="background: #f0fdf4; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                    <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">📅 Neto Anual</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">
+                        ${{formatFloat $result.YearlyNet 2}}
+                    </div>
+                </div>
+
+                <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">✨ Neto Mensual Ajustado</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #92400e;">
+                        ${{formatFloat $result.MonthlyAdjusted 2}}
+                    </div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">(Incluye prestaciones anuales)</div>
+                </div>
+
+                <!-- Detailed Breakdown -->
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;">
+                    <h4 style="font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">💰 Desglose Mensual:</h4>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">Salario Bruto</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 600;">
+                                ${{formatFloat $result.GrossSalary 2}}
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">(-) ISR</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                                -${{formatFloat $result.ISRTax 2}}
+                            </td>
+                        </tr>
+                        {{if $result.SubsidioEmpleo}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
+                            <td style="padding: 0.5rem 0; color: #059669; font-weight: 500;">(+) Subsidio al Empleo</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                +${{formatFloat $result.SubsidioEmpleo 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.IMSSWorker}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">(-) IMSS Trabajador</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                                -${{formatFloat $result.IMSSWorker 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.FondoAhorroEmployee}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">(-) Fondo de Ahorro (empleado)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                                -${{formatFloat $result.FondoAhorroEmployee 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.ValesDespensaMonthly}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
+                            <td style="padding: 0.5rem 0; color: #059669; font-weight: 500;">(+) Vales de Despensa</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                +${{formatFloat $result.ValesDespensaMonthly 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{range $result.OtherBenefits}}
+                        {{if eq .Cadence "monthly"}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
+                            <td style="padding: 0.5rem 0; color: #059669; font-weight: 500;">
+                                (+) {{.Name}} {{if .TaxFree}}<span style="font-size: 0.65rem; background: #dcfce7; color: #166534; padding: 0.125rem 0.25rem; border-radius: 3px; margin-left: 0.25rem;">Libre ISR</span>{{end}} <span style="font-size: 0.7rem; color: #64748b;">(mensual)</span>
+                            </td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                +${{formatFloat .Net 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{end}}
+                        <tr style="border-top: 2px solid #2563eb; background: #eff6ff;">
+                            <td style="padding: 0.5rem 0; font-weight: 700; color: #2563eb;">Neto Mensual</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #2563eb;">
+                                ${{formatFloat $result.NetSalary 2}}
+                            </td>
+                        </tr>
+                    </table>
+
+                    {{if or $result.AguinaldoNet $result.PrimaVacacionalNet $result.FondoAhorroYearly (gt (len $result.OtherBenefits) 0)}}
+                    <h4 style="font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-top: 1.5rem; margin-bottom: 0.75rem;">🎁 Prestaciones Anuales:</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+                        {{if $result.AguinaldoNet}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">🎄 Aguinaldo (neto)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                ${{formatFloat $result.AguinaldoNet 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.PrimaVacacionalNet}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">🏖️ Prima Vacacional (neto)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                ${{formatFloat $result.PrimaVacacionalNet 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.FondoAhorroYearly}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">💰 Fondo de Ahorro (retorno 2x)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                ${{formatFloat $result.FondoAhorroYearly 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{range $result.OtherBenefits}}
+                        {{if eq .Cadence "annual"}}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 0.5rem 0; color: #64748b;">
+                                ✨ {{.Name}} {{if .TaxFree}}<span style="font-size: 0.65rem; background: #dcfce7; color: #166534; padding: 0.125rem 0.25rem; border-radius: 3px; margin-left: 0.25rem;">Libre ISR</span>{{end}} <span style="font-size: 0.7rem; color: #64748b;">(anual)</span>
+                            </td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #059669; font-weight: 600;">
+                                ${{formatFloat .Net 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{end}}
+                    </table>
+                    {{end}}
+
+                    <h4 style="font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-top: 1.5rem; margin-bottom: 0.75rem;">📊 Totales Anuales:</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+                        {{if $result.YearlyGrossBase}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #fef3c7;">
+                            <td style="padding: 0.5rem 0; color: #92400e; font-weight: 600;">Bruto Anual (solo salario)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #92400e;">
+                                ${{formatFloat $result.YearlyGrossBase 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.InfonavitEmployerAnnual}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #fef9c3;">
+                            <td style="padding: 0.5rem 0; color: #854d0e; font-weight: 500;">
+                                {{if $result.HasInfonavitCredit}}
+                                    🏠 (+) Abono a Capital (Patrón 5%)
+                                    <span style="font-size: 0.65rem; background: #fef3c7; color: #92400e; padding: 0.125rem 0.25rem; border-radius: 3px; margin-left: 0.25rem;">No líquido</span>
+                                    <div style="font-size: 0.65rem; color: #64748b; margin-top: 0.25rem;">(Tu patrón paga esto directo a tu deuda)</div>
+                                {{else}}
+                                    🐷 (+) Ahorro Vivienda (Patrón 5%)
+                                    <span style="font-size: 0.65rem; background: #fef3c7; color: #92400e; padding: 0.125rem 0.25rem; border-radius: 3px; margin-left: 0.25rem;">No líquido</span>
+                                    <div style="font-size: 0.65rem; color: #64748b; margin-top: 0.25rem;">(Tu patrón deposita esto en tu Subcuenta/Afore)</div>
+                                {{end}}
+                            </td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ca8a04; font-weight: 600;">
+                                +${{formatFloat $result.InfonavitEmployerAnnual 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if $result.IMSSEmployerAnnual}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #fef9c3;">
+                            <td style="padding: 0.5rem 0; color: #854d0e; font-weight: 500;">
+                                (+) IMSS Patronal
+                                <span style="font-size: 0.65rem; background: #fef3c7; color: #92400e; padding: 0.125rem 0.25rem; border-radius: 3px; margin-left: 0.25rem;">No líquido</span>
+                            </td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ca8a04; font-weight: 600;">
+                                +${{formatFloat $result.IMSSEmployerAnnual 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        <tr style="border-bottom: 2px solid #6366f1; background: #eef2ff;">
+                            <td style="padding: 0.5rem 0; color: #4338ca; font-weight: 700;">💰 Comp Total Anual</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #4338ca;">
+                                ${{formatFloat $result.YearlyGross 2}}
+                            </td>
+                        </tr>
+                        {{if $result.UnpaidVacationLoss}}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: #fee2e2;">
+                            <td style="padding: 0.5rem 0; color: #991b1b; font-weight: 500;">
+                                (-) Ingreso no percibido por vacaciones
+                                <span style="font-size: 0.7rem; color: #64748b;">({{$result.UnpaidVacationDays}} días)</span>
+                            </td>
+                            <td style="padding: 0.5rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                                -${{formatFloat $result.UnpaidVacationLoss 2}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        <tr style="border-top: 2px solid #7c3aed; background: #faf5ff;">
+                            <td style="padding: 0.5rem 0; font-weight: 700; color: #7c3aed;">Neto Anual Total</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #7c3aed;">
+                                ${{formatFloat $result.YearlyNet 2}}
+                            </td>
+                        </tr>
+                        <tr style="border-top: 2px solid #059669; background: #f0fdf4;">
+                            <td style="padding: 0.5rem 0; font-weight: 700; color: #059669;">Neto Mensual Ajustado (÷ 12)</td>
+                            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #059669; font-size: 0.9rem;">
+                                ${{formatFloat $result.MonthlyAdjusted 2}}
+                            </td>
+                        </tr>
+                    </table>
+                    <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f0fdf4; border-radius: 4px; font-size: 0.7rem; color: #059669;">
+                        💡 <strong>Neto Mensual Ajustado:</strong> Incluye prestaciones anuales prorrateadas mensualmente. Mejor métrica para comparar poder adquisitivo real.
+                    </div>
+
+                    {{if $result.SBC}}
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #f1f5f9; border-radius: 6px; font-size: 0.75rem; color: #475569;">
+                        <strong>📌 Info:</strong> SBC Diario: ${{formatFloat $result.SBC 2}}
+                    </div>
+                    {{end}}
+                    
+                    <!-- Equity Breakdown -->
+                    {{if $result.EquityConfig}}
+                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border: 2px solid #3b82f6;">
+                        <h4 style="margin: 0 0 1rem 0; color: #0f172a; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📈 Equity Breakdown (4 Years)
+                        </h4>
+                        
+                        <div style="margin-bottom: 1rem; font-size: 0.75rem; color: #64748b;">
+                            <strong>Initial Grant:</strong> ${{printf "%.0f" $result.EquityConfig.InitialGrantUSD}} USD
+                            {{if $result.EquityConfig.HasRefreshers}}
+                            <br><strong>Annual Refreshers:</strong> ${{printf "%.0f" $result.EquityConfig.RefresherMinUSD}}-${{printf "%.0f" $result.EquityConfig.RefresherMaxUSD}} USD
+                            {{end}}
+                            <br><strong>Exchange Rate:</strong> ${{printf "%.4f" $.FiscalYear.USDMXNRate}} MXN/USD
+                            <span style="font-size: 0.65rem; color: #94a3b8;">(Actualizado desde Banxico)</span>
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.75rem; border-radius: 8px; overflow: hidden;">
+                            <thead>
+                                <tr style="background: #0f172a; color: white;">
+                                    <th style="padding: 0.75rem; text-align: left; border-right: 1px solid #334155;">Año</th>
+                                    <th style="padding: 0.75rem; text-align: right; border-right: 1px solid #334155;">Grant Inicial</th>
+                                    {{if $result.EquityConfig.HasRefreshers}}
+                                    <th style="padding: 0.75rem; text-align: right; border-right: 1px solid #334155;">Refreshers</th>
+                                    <th style="padding: 0.75rem; text-align: right; border-right: 1px solid #334155;">Nuevo Grant</th>
+                                    {{end}}
+                                    <th style="padding: 0.75rem; text-align: right; border-right: 1px solid #334155;">Total USD</th>
+                                    <th style="padding: 0.75rem; text-align: right;">Total MXN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range $result.EquitySchedule}}
+                                <tr style="border-bottom: 1px solid #e2e8f0; {{if eq .Year 0}}background: #eff6ff;{{end}}">
+                                    <td style="padding: 0.75rem; font-weight: 600; border-right: 1px solid #f1f5f9;">
+                                        Año {{.Year}}
+                                        {{if eq .Year 0}}
+                                        <span style="font-size: 0.7rem; color: #3b82f6; font-weight: normal;">(Ingreso)</span>
+                                        {{end}}
+                                    </td>
+                                    
+                                    {{if eq .Year 0}}
+                                        <!-- Special handling for Year 0 -->
+                                        <td colspan="{{if $result.EquityConfig.HasRefreshers}}5{{else}}3{{end}}" style="padding: 1rem; text-align: center; color: #1e40af; font-style: italic; border-left: 3px solid #3b82f6;">
+                                            💼 Grant otorgado: <strong>${{formatFloat $result.EquityConfig.InitialGrantUSD 0}} USD</strong> — Nada veste hasta cumplir 1 año
+                                        </td>
+                                    {{else}}
+                                        <!-- Normal years 1+ -->
+                                        <td style="padding: 0.75rem; text-align: right; border-right: 1px solid #f1f5f9;">${{formatFloat .InitialGrantVested 0}}</td>
+                                        {{if $result.EquityConfig.HasRefreshers}}
+                                        <td style="padding: 0.75rem; text-align: right; border-right: 1px solid #f1f5f9;">
+                                            ${{formatFloat .RefresherTotal 0}}
+                                        </td>
+                                        <td style="padding: 0.75rem; text-align: right; color: #10b981; border-right: 1px solid #f1f5f9;">
+                                            {{if .NewRefresherGranted}}
+                                                {{if gt .NewRefresherGranted 0.0}}
+                                                +${{formatFloat .NewRefresherGranted 0}}
+                                                {{else}}
+                                                -
+                                                {{end}}
+                                            {{else}}
+                                            -
+                                            {{end}}
+                                        </td>
+                                        {{end}}
+                                        <td style="padding: 0.75rem; text-align: right; font-weight: 700; color: #2563eb; border-right: 1px solid #f1f5f9;">${{formatFloat .TotalVested 0}}</td>
+                                        <td style="padding: 0.75rem; text-align: right; font-weight: 700; color: #059669;">
+                                            ${{formatFloat .TotalVestedMXN 2}}
+                                        </td>
+                                    {{end}}
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.7rem; color: #1e40af;">
+                            💡 <strong>Nota:</strong> Los refreshers se otorgan anualmente y vesten a lo largo de 4 años. El tipo de cambio utilizado es el oficial de Banxico actualizado diariamente.
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+        </div>
+
+        <!-- Download PDF Button (at bottom) -->
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+            <a href="/export-pdf" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 0.875rem 2rem; border: none; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(99, 102, 241, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 12px rgba(99, 102, 241, 0.3)'">
+                📄 Descargar Reporte PDF
+            </a>
+            <div style="margin-top: 0.75rem; font-size: 0.875rem; color: #64748b;">
+                {{if gt (len .Results) 1}}
+                💡 Descarga un reporte profesional lado a lado de ambos paquetes
+                {{else}}
+                💡 Descarga un reporte profesional de tu compensación
+                {{end}}
+            </div>
+        </div>
+
+    </div>
+    {{end}}
+
+    <!-- Info Box -->
+    <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 1.25rem; border-radius: 8px; font-size: 0.875rem; color: #1e40af;">
+        <strong>💡 Tip:</strong> El "Neto Mensual Ajustado" incluye las prestaciones anuales divididas entre 12 meses. Es una mejor métrica para comparar tu poder adquisitivo real.
+    </div>
+</div>
+
+<script>
+let benefitCounters = [0, 0]; // Counters for each package
+
+function toggleRegime(select, index) {
+    const benefitsSection = document.querySelector(`.benefits-section-${index}`);
+    const currencySelection = document.querySelector(`.currency-selection-${index}`);
+    const paymentFreqSelect = document.querySelector(`.payment-frequency-select-${index}`);
+    const unpaidVacationDiv = document.querySelector(`.unpaid-vacation-${index}`);
+    
+    if (!paymentFreqSelect) return;
+    
+    // Store current value BEFORE any changes
+    const currentFreq = paymentFreqSelect.value;
+    
+    if (select.value === 'resico') {
+        // RESICO: Hide benefits, show currency and unpaid vacation
+        benefitsSection.style.display = 'none';
+        currencySelection.style.display = 'block';
+        if (unpaidVacationDiv) unpaidVacationDiv.style.display = 'block';
+        benefitsSection.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        // Enable all options for RESICO
+        Array.from(paymentFreqSelect.options).forEach(option => {
+            option.style.display = '';
+            option.disabled = false;
+        });
+    } else {
+        // Sueldos y Salarios: Show benefits, hide currency and unpaid vacation
+        benefitsSection.style.display = 'block';
+        currencySelection.style.display = 'none';
+        if (unpaidVacationDiv) unpaidVacationDiv.style.display = 'none';
+        benefitsSection.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+        
+        // FORCE currency to MXN for Sueldos y Salarios (always MXN in Mexico)
+        const currencySelect = document.querySelectorAll('select[name="Currency[]"]')[index];
+        if (currencySelect) {
+            currencySelect.value = 'MXN';
+        }
+        
+        // Hide exchange rate input for Sueldos y Salarios
+        const exchangeRateDiv = document.querySelector(`.exchange-rate-input-${index}`);
+        if (exchangeRateDiv) {
+            exchangeRateDiv.style.display = 'none';
+        }
+        
+        // Hide Banxico notice
+        const exchangeRateDisplay = document.querySelector(`.exchange-rate-display-${index}`);
+        if (exchangeRateDisplay) {
+            exchangeRateDisplay.style.display = 'none';
+        }
+        
+        // Disable daily and hourly for Sueldos y Salarios
+        Array.from(paymentFreqSelect.options).forEach(option => {
+            if (option.value === 'daily' || option.value === 'hourly') {
+                option.style.display = 'none';
+                option.disabled = true;
+            } else {
+                option.style.display = '';
+                option.disabled = false;
+            }
+        });
+        
+        // If current selection is invalid for Sueldos, reset to monthly
+        if (currentFreq === 'daily' || currentFreq === 'hourly') {
+            paymentFreqSelect.value = 'monthly';
+        }
+    }
+    
+    // Ensure the value is preserved
+    if (paymentFreqSelect.value !== currentFreq && 
+        Array.from(paymentFreqSelect.options).some(opt => opt.value === currentFreq && !opt.disabled)) {
+        paymentFreqSelect.value = currentFreq;
+    }
+    
+    // Update salary label based on current frequency
+    toggleSalaryLabel(paymentFreqSelect, index);
+}
+
+function toggleExchangeRate(select, index) {
+    const exchangeRateInput = document.querySelector(`.exchange-rate-input-${index}`);
+    if (select.value === 'USD') {
+        exchangeRateInput.style.display = 'block';
+    } else {
+        exchangeRateInput.style.display = 'none';
+    }
+}
+
+function toggleSalaryLabel(select, index) {
+    const salaryLabel = document.querySelector(`.salary-label-${index}`);
+    const hoursPerWeek = document.querySelector(`.hours-per-week-${index}`);
+    
+    switch(select.value) {
+        case 'hourly':
+            salaryLabel.textContent = '💰 Tarifa Por Hora';
+            hoursPerWeek.style.display = 'block';
+            break;
+        case 'daily':
+            salaryLabel.textContent = '💰 Salario Diario';
+            hoursPerWeek.style.display = 'none';
+            break;
+        case 'weekly':
+            salaryLabel.textContent = '💰 Salario Semanal';
+            hoursPerWeek.style.display = 'none';
+            break;
+        case 'biweekly':
+            salaryLabel.textContent = '💰 Salario Quincenal';
+            hoursPerWeek.style.display = 'none';
+            break;
+        case 'monthly':
+        default:
+            salaryLabel.textContent = '💰 Salario Bruto';
+            hoursPerWeek.style.display = 'none';
+            break;
+    }
+}
+
+function addBenefit(packageIndex, savedBenefit = null) {
+    benefitCounters[packageIndex]++;
+    const container = document.getElementById(`otherBenefits-${packageIndex}`);
+    const benefitId = `benefit-${packageIndex}-${benefitCounters[packageIndex]}`;
+    
+    const benefitDiv = document.createElement('div');
+    benefitDiv.id = benefitId;
+    benefitDiv.style.cssText = 'display: flex; flex-direction: column; gap: 0; background: white; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0;';
+    
+    const name = savedBenefit ? savedBenefit.name : '';
+    // Format amount with commas if it exists
+    let amount = '';
+    if (savedBenefit && savedBenefit.amount) {
+        amount = formatNumber(savedBenefit.amount.toString());
+    }
+    const taxFree = savedBenefit ? savedBenefit.taxFree : false;
+    const currency = savedBenefit ? savedBenefit.currency : 'MXN';
+    const cadence = savedBenefit ? savedBenefit.cadence : 'monthly';
+    
+    benefitDiv.innerHTML = `
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%;">
+            <input type="text" name="OtherBenefitName-${packageIndex}[]" placeholder="Ej: Bono anual" value="${name}" style="flex: 1; min-width: 120px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">
+            <input type="text" name="OtherBenefitAmount-${packageIndex}[]" placeholder="$1,500" value="${amount}" class="money-input" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">
+            <select name="OtherBenefitCurrency-${packageIndex}[]" class="benefit-currency-select" onchange="toggleBenefitBanxicoNotice('${benefitId}')" style="width: 70px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem;">
+                <option value="MXN" ${currency === 'MXN' ? 'selected' : ''}>MXN</option>
+                <option value="USD" ${currency === 'USD' ? 'selected' : ''}>USD</option>
+            </select>
+            <select name="OtherBenefitCadence-${packageIndex}[]" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem;">
+                <option value="monthly" ${cadence === 'monthly' ? 'selected' : ''}>Mensual</option>
+                <option value="annual" ${cadence === 'annual' ? 'selected' : ''}>Anual</option>
+            </select>
+            <label style="display: flex; align-items: center; white-space: nowrap; font-size: 0.7rem; cursor: pointer;">
+                <input type="checkbox" name="OtherBenefitTaxFree-${packageIndex}[]" value="${benefitCounters[packageIndex]}" ${taxFree ? 'checked' : ''} style="margin-right: 0.25rem;">
+                Libre ISR
+            </label>
+            <button type="button" onclick="removeBenefit('${benefitId}')" style="background: #ef4444; color: white; padding: 0.35rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">🗑️</button>
+        </div>
+        <div id="banxico-notice-${benefitId}" class="banxico-notice" style="display: ${currency === 'USD' ? 'block' : 'none'}; width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
+            <div style="font-size: 0.65rem; color: #1e40af; line-height: 1.4;">
+                💡 <strong>Tipo de cambio oficial Banxico:</strong> {{if .FiscalYear}}${{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}$20.00{{end}} MXN/USD
+                <div style="margin-top: 0.25rem; font-size: 0.6rem; color: #64748b;">Actualizado automáticamente a las 14:00 CST</div>
+            </div>
+        </div>
+    `;
+    container.appendChild(benefitDiv);
+    
+    // Attach comma formatting to money inputs
+    const moneyInputs = benefitDiv.querySelectorAll('.money-input');
+    attachCommaFormatting(moneyInputs);
+}
+
+function removeBenefit(benefitId) {
+    const element = document.getElementById(benefitId);
+    if (element) {
+        element.remove();
+    }
+}
+
+function toggleBenefitBanxicoNotice(benefitId) {
+    const benefitDiv = document.getElementById(benefitId);
+    if (!benefitDiv) return;
+    
+    const currencySelect = benefitDiv.querySelector('.benefit-currency-select');
+    const banxicoNotice = document.getElementById(`banxico-notice-${benefitId}`);
+    
+    if (currencySelect && banxicoNotice) {
+        if (currencySelect.value === 'USD') {
+            banxicoNotice.style.display = 'block';
+        } else {
+            banxicoNotice.style.display = 'none';
+        }
+    }
+}
+
+function formatNumber(value) {
+    // Remove all non-digit characters except decimal point
+    const cleanValue = value.replace(/[^\d.]/g, '');
+    // Split on decimal point
+    const parts = cleanValue.split('.');
+    // Add commas to integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Return formatted value (limit to 2 decimal places if there's a decimal)
+    return parts.length > 1 ? parts[0] + '.' + parts[1].substring(0, 2) : parts[0];
+}
+
+function attachCommaFormatting(inputs) {
+    inputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldLength = e.target.value.length;
+            let formatted = formatNumber(e.target.value);
+            
+            // Check for max value constraint (e.g., Vales de Despensa max 3439)
+            const maxValue = e.target.getAttribute('data-max');
+            if (maxValue) {
+                const numericValue = parseFloat(formatted.replace(/,/g, ''));
+                if (!isNaN(numericValue) && numericValue > parseFloat(maxValue)) {
+                    formatted = formatNumber(maxValue);
+                    // Visual feedback: briefly highlight red
+                    e.target.style.borderColor = '#ef4444';
+                    setTimeout(() => {
+                        e.target.style.borderColor = '#e2e8f0';
+                    }, 500);
+                }
+            }
+            
+            const newLength = formatted.length;
+            e.target.value = formatted;
+            
+            // Adjust cursor position after formatting
+            const diff = newLength - oldLength;
+            e.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+        });
+    });
+}
+
+// Load saved values from hidden inputs
+function loadSavedValues() {
+    [0, 1].forEach(idx => {
+        const packageDiv = document.querySelector(`[data-package-index="${idx}"]`);
+        if (!packageDiv) return;
+        
+        // Load package name
+        const savedName = document.getElementById(`saved-pkg-${idx}-name`);
+        if (savedName && savedName.value) {
+            const nameInput = packageDiv.querySelector('.package-name-input');
+            if (nameInput) nameInput.value = savedName.value;
+        }
+        
+        // Load basic values
+        const savedRegime = document.getElementById(`saved-pkg-${idx}-regime`);
+        const savedCurrency = document.getElementById(`saved-pkg-${idx}-currency`);
+        const savedExchangeRate = document.getElementById(`saved-pkg-${idx}-exchange-rate`);
+        const savedPaymentFreq = document.getElementById(`saved-pkg-${idx}-payment-freq`);
+        const savedHours = document.getElementById(`saved-pkg-${idx}-hours`);
+        const savedSalary = document.getElementById(`saved-pkg-${idx}-salary`);
+        
+        if (savedRegime && savedRegime.value) {
+            const regimeSelect = packageDiv.querySelector('.regime-select');
+            if (regimeSelect) regimeSelect.value = savedRegime.value;
+        }
+        
+        if (savedCurrency && savedCurrency.value) {
+            const currencySelect = packageDiv.querySelector(`select[name="Currency[]"]`);
+            if (currencySelect) currencySelect.value = savedCurrency.value;
+            
+            // Trigger exchange rate visibility
+            if (savedCurrency.value === 'USD') {
+                const exchangeRateDiv = document.querySelector(`.exchange-rate-input-${idx}`);
+                if (exchangeRateDiv) exchangeRateDiv.style.display = 'block';
+                
+                if (savedExchangeRate && savedExchangeRate.value) {
+                    const exchangeInput = packageDiv.querySelector(`input[name="ExchangeRate[]"]`);
+                    if (exchangeInput) exchangeInput.value = savedExchangeRate.value;
+                }
+            }
+        }
+        
+        if (savedPaymentFreq && savedPaymentFreq.value) {
+            const freqSelect = packageDiv.querySelector(`.payment-frequency-select-${idx}`);
+            if (freqSelect) {
+                freqSelect.value = savedPaymentFreq.value;
+                toggleSalaryLabel(freqSelect, idx);
+            }
+        }
+        
+        if (savedHours && savedHours.value) {
+            const hoursInput = packageDiv.querySelector(`input[name="HoursPerWeek[]"]`);
+            if (hoursInput) hoursInput.value = savedHours.value;
+        }
+        
+        // Load unpaid vacation days (RESICO only)
+        const savedUnpaidVacation = document.getElementById(`saved-pkg-${idx}-unpaid-vacation`);
+        if (savedUnpaidVacation && savedUnpaidVacation.value) {
+            const unpaidVacationInput = packageDiv.querySelector(`input[name="UnpaidVacationDays[]"]`);
+            if (unpaidVacationInput) unpaidVacationInput.value = savedUnpaidVacation.value;
+        }
+        
+        // Load equity values
+        const savedHasEquity = document.getElementById(`saved-pkg-${idx}-has-equity`);
+        if (savedHasEquity && savedHasEquity.value === 'true') {
+            const equityCheckbox = packageDiv.querySelector(`.equity-toggle-checkbox[data-package-index="${idx}"]`);
+            if (equityCheckbox) {
+                equityCheckbox.checked = true;
+                toggleEquitySection(equityCheckbox);
+            }
+            
+            const savedInitialEquity = document.getElementById(`saved-pkg-${idx}-initial-equity`);
+            if (savedInitialEquity && savedInitialEquity.value) {
+                const initialEquityInput = packageDiv.querySelector(`input[name="InitialEquityUSD[]"]`);
+                if (initialEquityInput) initialEquityInput.value = formatNumber(savedInitialEquity.value);
+            }
+            
+            const savedHasRefreshers = document.getElementById(`saved-pkg-${idx}-has-refreshers`);
+            if (savedHasRefreshers && savedHasRefreshers.value === 'true') {
+                const refresherCheckbox = packageDiv.querySelector(`.refresher-checkbox`);
+                if (refresherCheckbox) {
+                    refresherCheckbox.checked = true;
+                    toggleRefresherFields(refresherCheckbox, idx);
+                }
+                
+                const savedRefresherMin = document.getElementById(`saved-pkg-${idx}-refresher-min`);
+                if (savedRefresherMin && savedRefresherMin.value) {
+                    const minInput = document.querySelectorAll(`input[name="RefresherMinUSD[]"]`)[idx];
+                    if (minInput) minInput.value = formatNumber(savedRefresherMin.value);
+                }
+                
+                const savedRefresherMax = document.getElementById(`saved-pkg-${idx}-refresher-max`);
+                if (savedRefresherMax && savedRefresherMax.value) {
+                    const maxInput = document.querySelectorAll(`input[name="RefresherMaxUSD[]"]`)[idx];
+                    if (maxInput) maxInput.value = formatNumber(savedRefresherMax.value);
+                }
+            }
+        }
+        
+        if (savedSalary && savedSalary.value) {
+            const salaryInput = packageDiv.querySelector('.salary-input');
+            if (salaryInput) {
+                // Format with commas
+                salaryInput.value = formatNumber(savedSalary.value);
+            }
+        }
+        
+        // Load benefits checkboxes
+        const savedHasAguinaldo = document.getElementById(`saved-pkg-${idx}-has-aguinaldo`);
+        const savedHasVales = document.getElementById(`saved-pkg-${idx}-has-vales`);
+        const savedHasPrima = document.getElementById(`saved-pkg-${idx}-has-prima`);
+        const savedHasFondo = document.getElementById(`saved-pkg-${idx}-has-fondo`);
+        
+        const aguinaldoCheckboxes = document.querySelectorAll(`input[name="HasAguinaldo[]"][value="${idx}"]`);
+        if (savedHasAguinaldo && savedHasAguinaldo.value === 'true' && aguinaldoCheckboxes.length > 0) {
+            aguinaldoCheckboxes[0].checked = true;
+            const aguinaldoDaysInput = document.querySelectorAll(`input[name="AguinaldoDays[]"]`)[idx];
+            const savedAguinaldoDays = document.getElementById(`saved-pkg-${idx}-aguinaldo-days`);
+            if (aguinaldoDaysInput && savedAguinaldoDays && savedAguinaldoDays.value) {
+                aguinaldoDaysInput.value = savedAguinaldoDays.value;
+            }
+        }
+        
+        const valesCheckboxes = document.querySelectorAll(`input[name="HasValesDespensa[]"][value="${idx}"]`);
+        if (savedHasVales && savedHasVales.value === 'true' && valesCheckboxes.length > 0) {
+            valesCheckboxes[0].checked = true;
+            const valesAmountInput = document.querySelectorAll(`input[name="ValesDespensaAmount[]"]`)[idx];
+            const savedValesAmount = document.getElementById(`saved-pkg-${idx}-vales-amount`);
+            if (valesAmountInput && savedValesAmount && savedValesAmount.value) {
+                // Format with commas
+                valesAmountInput.value = formatNumber(savedValesAmount.value);
+            }
+        }
+        
+        const primaCheckboxes = document.querySelectorAll(`input[name="HasPrimaVacacional[]"][value="${idx}"]`);
+        if (savedHasPrima && savedHasPrima.value === 'true' && primaCheckboxes.length > 0) {
+            primaCheckboxes[0].checked = true;
+            const vacationDaysInput = document.querySelectorAll(`input[name="VacationDays[]"]`)[idx];
+            const primaPercentInput = document.querySelectorAll(`input[name="PrimaVacacionalPercent[]"]`)[idx];
+            const savedVacationDays = document.getElementById(`saved-pkg-${idx}-vacation-days`);
+            const savedPrimaPercent = document.getElementById(`saved-pkg-${idx}-prima-percent`);
+            if (vacationDaysInput && savedVacationDays && savedVacationDays.value) {
+                vacationDaysInput.value = savedVacationDays.value;
+            }
+            if (primaPercentInput && savedPrimaPercent && savedPrimaPercent.value) {
+                primaPercentInput.value = savedPrimaPercent.value;
+            }
+        }
+        
+        const fondoCheckboxes = document.querySelectorAll(`input[name="HasFondoAhorro[]"][value="${idx}"]`);
+        if (savedHasFondo && savedHasFondo.value === 'true' && fondoCheckboxes.length > 0) {
+            fondoCheckboxes[0].checked = true;
+            const fondoPercentInput = document.querySelectorAll(`input[name="FondoAhorroPercent[]"]`)[idx];
+            const savedFondoPercent = document.getElementById(`saved-pkg-${idx}-fondo-percent`);
+            if (fondoPercentInput && savedFondoPercent && savedFondoPercent.value) {
+                fondoPercentInput.value = savedFondoPercent.value;
+            }
+        }
+        
+        // Load "Otras prestaciones"
+        const savedOtherBenefits = document.querySelectorAll(`.saved-other-benefit-${idx}`);
+        savedOtherBenefits.forEach(benefitInput => {
+            const benefit = {
+                name: benefitInput.getAttribute('data-name'),
+                amount: benefitInput.getAttribute('data-amount'),
+                taxFree: benefitInput.getAttribute('data-taxfree') === 'true',
+                currency: benefitInput.getAttribute('data-currency') || 'MXN',
+                cadence: benefitInput.getAttribute('data-cadence') || 'monthly'
+            };
+            addBenefit(idx, benefit);
+        });
+    });
+}
+
+// Strip commas before form submission
+function clearAllInputs() {
+    if (!confirm('¿Estás seguro de que quieres limpiar todos los campos?')) {
+        return;
+    }
+    
+    // Redirect to homepage (clears session)
+    window.location.href = '/';
+}
+
+// Toggle refresher fields
+function toggleRefresherFields(checkbox, index) {
+    const refresherFields = document.querySelector(`.refresher-fields-${index}`);
+    if (refresherFields) {
+        refresherFields.style.display = checkbox.checked ? 'block' : 'none';
+    }
+}
+
+// Toggle entire equity section
+function toggleEquitySection(checkbox) {
+    const packageIndex = checkbox.getAttribute('data-package-index');
+    const equitySection = document.querySelector(`.equity-section-${packageIndex}`);
+    if (equitySection) {
+        equitySection.style.display = checkbox.checked ? 'block' : 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup equity section toggle checkboxes
+    document.querySelectorAll('.equity-toggle-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            toggleEquitySection(this);
+        });
+    });
+    
+    // Setup refresher checkbox toggles
+    document.querySelectorAll('.refresher-checkbox').forEach((checkbox, index) => {
+        checkbox.addEventListener('change', function() {
+            toggleRefresherFields(this, index);
+        });
+    });
+    // Load saved values FIRST (this sets regime, frequency, and all inputs)
+    loadSavedValues();
+    
+    // Then sync UI visibility/options based on loaded regime
+    // Since toggleRegime no longer destroys the dropdown, values are preserved
+    document.querySelectorAll('.regime-select').forEach((select, index) => {
+        toggleRegime(select, index);
+    });
+    
+    // Attach comma formatting to all money inputs
+    attachCommaFormatting(document.querySelectorAll('.salary-input, .money-input'));
+    
+    // Handle form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Remove commas from all inputs
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+        inputs.forEach(input => {
+            if (input.value) {
+                input.value = input.value.replace(/,/g, '');
+            }
+        });
+        
+        // Force MXN for Sueldos y Salarios (safety check)
+        document.querySelectorAll('.regime-select').forEach((regimeSelect, idx) => {
+            if (regimeSelect.value === 'sueldos_salarios') {
+                const currencySelect = document.querySelectorAll('select[name="Currency[]"]')[idx];
+                if (currencySelect) {
+                    currencySelect.value = 'MXN';
+                }
+            }
+        });
+    });
+    
+    // Initialize comparison mode on page load
+    initializeComparisonMode();
+});
+
+// ========== COMPARISON MODE TOGGLE FUNCTIONS ==========
+
+function setComparisonMode(isComparing) {
+    const packagesWrapper = document.getElementById('packagesWrapper');
+    const packagesGrid = document.getElementById('packagesGrid');
+    const package2 = document.getElementById('package-2');
+    const addButton = document.getElementById('addComparisonButton');
+    const submitButton = document.getElementById('submitButton');
+    
+    if (!packagesWrapper || !packagesGrid || !package2 || !addButton || !submitButton) return;
+    
+    if (isComparing) {
+        // COMPARISON MODE: Show both packages side-by-side (centered)
+        packagesWrapper.style.justifyContent = 'center';
+        packagesGrid.style.maxWidth = '100%';
+        packagesGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
+        package2.style.display = 'block';
+        addButton.style.display = 'none';
+        submitButton.textContent = '💰 Comparar Paquetes';
+    } else {
+        // SINGLE MODE: Show only Package 1 with vertical add button
+        packagesWrapper.style.justifyContent = 'center';
+        packagesGrid.style.maxWidth = '600px';
+        packagesGrid.style.gridTemplateColumns = '1fr';
+        package2.style.display = 'none';
+        addButton.style.display = 'flex';
+        submitButton.textContent = '💰 Calcular Compensación';
+        
+        // Clear all inputs in Package 2
+        package2.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+            if (input.classList.contains('package-name-input')) {
+                input.value = 'Paquete 2';
+            } else {
+                input.value = '';
+            }
+        });
+        package2.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        package2.querySelectorAll('select').forEach(select => {
+            select.selectedIndex = 0;
+        });
+        
+        // Clear any dynamic "Otras prestaciones"
+        const otherBenefitsContainer = package2.querySelector('.other-benefits-1');
+        if (otherBenefitsContainer) {
+            otherBenefitsContainer.innerHTML = '';
+            benefitCounters[1] = 0;
+        }
+    }
+}
+
+function initializeComparisonMode() {
+    // Check if we have saved inputs for Package 2 (server-side persistence)
+    const savedPackage2Salary = document.getElementById('saved-pkg-1-salary');
+    const savedPackage2Name = document.getElementById('saved-pkg-1-name');
+    
+    // Auto-detect: If Package 2 has meaningful data, initialize in Comparison Mode
+    const hasPackage2Data = (savedPackage2Salary && savedPackage2Salary.value && savedPackage2Salary.value !== '') ||
+                           (savedPackage2Name && savedPackage2Name.value && savedPackage2Name.value !== '' && savedPackage2Name.value !== 'Paquete 2');
+    
+    if (hasPackage2Data) {
+        setComparisonMode(true);
+    } else {
+        setComparisonMode(false);
+    }
+}
+</script>
+{{end}}
+

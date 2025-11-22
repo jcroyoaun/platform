@@ -1,0 +1,254 @@
+{{define "page:title"}}API para Desarrolladores | TotalComp MX{{end}}
+
+{{define "page:main"}}
+<div style="width: 100%; box-sizing: border-box;">
+    
+    <!-- Hero Section -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 4rem 2rem; text-align: center;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h1 style="color: white; font-size: 2.5rem; font-weight: 700; margin: 0 0 1rem 0; line-height: 1.2;">
+                La API de Nómina<br>para Developers en México 🇲🇽
+            </h1>
+            <p style="color: #94a3b8; font-size: 1.25rem; margin: 0 0 2rem 0; line-height: 1.6;">
+                Simulador fiscal actualizado para 2025. Integra cálculos de ISR, IMSS<br>y compensación total en tu SaaS, ERP o app en minutos.
+            </p>
+            {{if .AuthenticatedUser}}
+            <a href="/account/developer" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.125rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: transform 0.2s;" 
+               onmouseover="this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.transform='translateY(0)'">
+                🔑 Ir a Tu Dashboard
+            </a>
+            {{else}}
+            <a href="/signup" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.125rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: transform 0.2s;" 
+               onmouseover="this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.transform='translateY(0)'">
+                🚀 Obtener API Key Gratis
+            </a>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div style="max-width: 1200px; margin: 4rem auto; padding: 0 2rem;">
+        <h2 style="text-align: center; color: #0f172a; font-size: 2rem; font-weight: 700; margin-bottom: 3rem;">
+            ¿Por qué TotalComp MX API?
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    Actualizado 2025
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    ISR, UMA ($3,439.46), IMSS, y las nuevas tablas de Cesantía progresiva. Todo al día.
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #6366f1;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">⚖️</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    RESICO vs Sueldos
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    Soporta ambos regímenes fiscales. Compara ofertas de trabajo en segundos.
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #f59e0b;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    RESTful JSON
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    Simple, rápido, sin librerías raras. Un POST request y listo.
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #ef4444;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">🔒</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    Segura y Privada
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    API Keys con Bearer tokens. Sin tracking, sin venta de datos.
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #8b5cf6;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">💰</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    Incluye Todo
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    Aguinaldo, Vales, Prima Vacacional, Fondo de Ahorro, Infonavit, IMSS Patronal.
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
+                <h3 style="color: #0f172a; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem 0;">
+                    Desglose Completo
+                </h3>
+                <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                    No solo el neto. Recibes ISR, IMSS, SBC, compensación total anual, y más.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Example -->
+    <div style="background: #f8fafc; padding: 4rem 2rem;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h2 style="text-align: center; color: #0f172a; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+                Así de fácil 🎯
+            </h2>
+            <p style="text-align: center; color: #64748b; margin-bottom: 2rem; font-size: 1.125rem;">
+                Un request, resultados precisos.
+            </p>
+
+            <div style="background: #0f172a; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow-x: auto;">
+                <div style="color: #10b981; font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">
+                    # Request
+                </div>
+                <pre style="margin: 0 0 1.5rem 0; color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 0.875rem; white-space: pre-wrap; line-height: 1.6;"><span style="color: #f59e0b;">curl</span> <span style="color: #94a3b8;">-X POST</span> https://totalcomp.mx/api/v1/calculate \
+  <span style="color: #94a3b8;">-H</span> <span style="color: #10b981;">"Authorization: Bearer YOUR_API_KEY"</span> \
+  <span style="color: #94a3b8;">-H</span> <span style="color: #10b981;">"Content-Type: application/json"</span> \
+  <span style="color: #94a3b8;">-d</span> '{
+    <span style="color: #6366f1;">"salary"</span>: <span style="color: #f59e0b;">50000</span>,
+    <span style="color: #6366f1;">"regime"</span>: <span style="color: #10b981;">"sueldos"</span>,
+    <span style="color: #6366f1;">"has_aguinaldo"</span>: <span style="color: #10b981;">true</span>,
+    <span style="color: #6366f1;">"aguinaldo_days"</span>: <span style="color: #f59e0b;">30</span>
+  }'</pre>
+
+                <div style="color: #10b981; font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">
+                    # Response
+                </div>
+                <pre style="margin: 0; color: #e2e8f0; font-family: 'Courier New', monospace; font-size: 0.875rem; white-space: pre-wrap; line-height: 1.6;">{
+  <span style="color: #6366f1;">"success"</span>: <span style="color: #10b981;">true</span>,
+  <span style="color: #6366f1;">"data"</span>: {
+    <span style="color: #6366f1;">"net_salary"</span>: <span style="color: #f59e0b;">37245.83</span>,
+    <span style="color: #6366f1;">"isr_tax"</span>: <span style="color: #f59e0b;">10754.17</span>,
+    <span style="color: #6366f1;">"yearly_net"</span>: <span style="color: #f59e0b;">541750.00</span>,
+    <span style="color: #6366f1;">"monthly_adjusted"</span>: <span style="color: #f59e0b;">45145.83</span>
+  }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div style="max-width: 1200px; margin: 4rem auto; padding: 0 2rem;">
+        <h2 style="text-align: center; color: #0f172a; font-size: 2rem; font-weight: 700; margin-bottom: 3rem;">
+            Precios Transparentes 💎
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 800px; margin: 0 auto;">
+            <!-- Hobby Plan -->
+            <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #e2e8f0;">
+                <h3 style="color: #0f172a; font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                    Hobby
+                </h3>
+                <div style="color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    Para proyectos personales
+                </div>
+                <div style="color: #0f172a; font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    Gratis
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0;">
+                    <li style="padding: 0.5rem 0; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                        ✅ 100 llamadas/mes
+                    </li>
+                    <li style="padding: 0.5rem 0; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                        ✅ Todos los regímenes
+                    </li>
+                    <li style="padding: 0.5rem 0; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                        ✅ Desglose completo
+                    </li>
+                    <li style="padding: 0.5rem 0; color: #64748b;">
+                        ✅ Soporte por email
+                    </li>
+                </ul>
+                {{if .AuthenticatedUser}}
+                <a href="/account/developer" style="display: block; background: #e2e8f0; color: #0f172a; padding: 0.75rem; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; transition: background 0.2s;" 
+                   onmouseover="this.style.background='#cbd5e1'" 
+                   onmouseout="this.style.background='#e2e8f0'">
+                    Ir al Dashboard
+                </a>
+                {{else}}
+                <a href="/signup" style="display: block; background: #e2e8f0; color: #0f172a; padding: 0.75rem; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; transition: background 0.2s;" 
+                   onmouseover="this.style.background='#cbd5e1'" 
+                   onmouseout="this.style.background='#e2e8f0'">
+                    Empezar Gratis
+                </a>
+                {{end}}
+            </div>
+
+            <!-- Pro Plan -->
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3); position: relative; border: 2px solid #6366f1;">
+                <div style="position: absolute; top: -12px; right: 20px; background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                    PRÓXIMAMENTE
+                </div>
+                <h3 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                    Pro
+                </h3>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    Para startups y empresas
+                </div>
+                <div style="color: white; font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
+                    $499 MXN
+                </div>
+                <div style="color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                    por mes
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0;">
+                    <li style="padding: 0.5rem 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                        ✅ 10,000 llamadas/mes
+                    </li>
+                    <li style="padding: 0.5rem 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                        ✅ Rate limiting aumentado
+                    </li>
+                    <li style="padding: 0.5rem 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                        ✅ Soporte prioritario
+                    </li>
+                    <li style="padding: 0.5rem 0; color: white;">
+                        ✅ Webhook notifications
+                    </li>
+                </ul>
+                <a href="mailto:hola@totalcomp.mx?subject=Interesado en Plan Pro" style="display: block; background: white; color: #6366f1; padding: 0.75rem; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 700; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;" 
+                   onmouseover="this.style.transform='translateY(-2px)'" 
+                   onmouseout="this.style.transform='translateY(0)'">
+                    Contactar Ventas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Final -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 4rem 2rem; text-align: center;">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <h2 style="color: white; font-size: 2rem; font-weight: 700; margin: 0 0 1rem 0;">
+                ¿Listo para integrar?
+            </h2>
+            <p style="color: rgba(255,255,255,0.9); font-size: 1.125rem; margin: 0 0 2rem 0;">
+                Obtén tu API key en 30 segundos. Sin tarjeta de crédito.
+            </p>
+            {{if .AuthenticatedUser}}
+            <a href="/account/developer" style="display: inline-block; background: white; color: #059669; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;" 
+               onmouseover="this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.transform='translateY(0)'">
+                🔑 Ver Mi API Key
+            </a>
+            {{else}}
+            <a href="/signup" style="display: inline-block; background: white; color: #059669; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1.125rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;" 
+               onmouseover="this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.transform='translateY(0)'">
+                🚀 Crear Cuenta Gratis
+            </a>
+            {{end}}
+        </div>
+    </div>
+
+</div>
+{{end}}
+

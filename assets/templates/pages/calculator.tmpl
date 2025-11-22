@@ -1,0 +1,132 @@
+{{define "page:title"}}Calculadora de Nómina 2025{{end}}
+
+{{define "page:main"}}
+<div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <h1 style="color: #2563eb; margin-bottom: 1.5rem;">🇲🇽 Calculadora de Nómina Mexicana 2025</h1>
+    
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <form action="/calculator" method="POST" novalidate>
+            <input type="hidden" name="csrfToken" value="{{.CSRFToken}}">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="GrossMonthlySalary" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
+                    💰 Salario Mensual Bruto
+                </label>
+                <input 
+                    type="number" 
+                    id="GrossMonthlySalary" 
+                    name="GrossMonthlySalary" 
+                    value="{{.Form.GrossMonthlySalary}}"
+                    step="0.01"
+                    placeholder="Ej: 15000"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 1rem;"
+                >
+                {{with .Form.Validator.FieldErrors.GrossMonthlySalary}}
+                    <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{.}}</span>
+                {{end}}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="YearsOfService" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
+                    📅 Años de Antigüedad
+                </label>
+                <input 
+                    type="number" 
+                    id="YearsOfService" 
+                    name="YearsOfService" 
+                    value="{{.Form.YearsOfService}}"
+                    min="0"
+                    placeholder="Ej: 3"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 1rem;"
+                >
+                {{with .Form.Validator.FieldErrors.YearsOfService}}
+                    <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{.}}</span>
+                {{end}}
+            </div>
+
+            <button 
+                type="submit"
+                style="background: #2563eb; color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%;"
+            >
+                Calcular Nómina
+            </button>
+        </form>
+    </div>
+
+    {{if .Result}}
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="color: #059669; margin-bottom: 1.5rem; border-bottom: 2px solid #059669; padding-bottom: 0.5rem;">
+            📊 Resultado del Cálculo
+        </h2>
+
+        <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #059669;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.125rem; font-weight: 600;">💵 Salario Neto Mensual</span>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #059669;">
+                    ${{printf "%.2f" .Result.NetSalary}}
+                </span>
+            </div>
+        </div>
+
+        <h3 style="color: #475569; margin-bottom: 1rem; font-size: 1rem;">Desglose:</h3>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 0.75rem 0; color: #64748b;">Salario Bruto</td>
+                <td style="padding: 0.75rem 0; text-align: right; font-weight: 600;">
+                    ${{printf "%.2f" .Result.GrossSalary}}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 0.75rem 0; color: #64748b;">(-) ISR</td>
+                <td style="padding: 0.75rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                    -${{printf "%.2f" .Result.ISRTax}}
+                </td>
+            </tr>
+            {{if gt .Result.SubsidioEmpleo 0}}
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 0.75rem 0; color: #64748b;">(+) Subsidio al Empleo</td>
+                <td style="padding: 0.75rem 0; text-align: right; color: #059669; font-weight: 600;">
+                    +${{printf "%.2f" .Result.SubsidioEmpleo}}
+                </td>
+            </tr>
+            {{end}}
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 0.75rem 0; color: #64748b;">(-) IMSS Trabajador</td>
+                <td style="padding: 0.75rem 0; text-align: right; color: #ef4444; font-weight: 600;">
+                    -${{printf "%.2f" .Result.IMSSWorker}}
+                </td>
+            </tr>
+            <tr style="border-top: 2px solid #059669; background: #f8fafc;">
+                <td style="padding: 0.75rem 0; font-weight: 700; color: #059669;">Neto a Recibir</td>
+                <td style="padding: 0.75rem 0; text-align: right; font-weight: 700; color: #059669; font-size: 1.25rem;">
+                    ${{printf "%.2f" .Result.NetSalary}}
+                </td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border-radius: 6px; font-size: 0.875rem; color: #475569;">
+            <strong>📌 Información Adicional:</strong><br>
+            <div style="margin-top: 0.5rem;">
+                • Salario Base de Cotización (SBC): ${{printf "%.2f" .Result.SBC}} diario<br>
+                {{if .FiscalYear}}
+                • UMA Mensual: ${{printf "%.2f" .FiscalYear.UMAMonthly}}<br>
+                • Año Fiscal: {{.FiscalYear.Year}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <div style="margin-top: 2rem; padding: 1rem; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 4px; font-size: 0.875rem; color: #1e40af;">
+        <strong>ℹ️ Nota:</strong> Este cálculo incluye las tarifas ISR 2025, tasas IMSS progresivas de Cesantía, 
+        y el Subsidio al Empleo cuando aplica. Los cálculos son aproximados y no incluyen beneficios adicionales 
+        como Fondo de Ahorro o Infonavit.
+    </div>
+
+    <div style="margin-top: 1rem; text-align: center;">
+        <a href="/" style="color: #2563eb; text-decoration: none;">← Regresar al inicio</a>
+    </div>
+</div>
+{{end}}
+

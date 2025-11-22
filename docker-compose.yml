@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: compensacion-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-compensacion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-compensacion}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U compensacion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: compensacion-app
+    ports:
+      # For LOCAL development:
+      - "3080:3080"
+      # For PRODUCTION (Auto HTTPS), also expose these:
+      # - "80:80"    # HTTP (redirects to HTTPS)
+      # - "443:443"  # HTTPS
+    environment:
+      # For LOCAL development (HTTP only):
+      - BASE_URL=http://localhost:3080
+      - HTTP_PORT=3080
+      # For PRODUCTION with totalcomp.mx (Auto HTTPS with Let's Encrypt):
+      # Uncomment these 3 lines when deploying:
+      # - AUTO_HTTPS_DOMAIN=totalcomp.mx
+      # - AUTO_HTTPS_EMAIL=jcroyoaun@gmail.com
+      # - AUTO_HTTPS_STAGING=false
+      # Database (using environment variables)
+      - DB_DSN=${POSTGRES_USER:-compensacion}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-compensacion}?sslmode=disable
+      - DB_AUTOMIGRATE=true
+      # Session & Security
+      - COOKIE_SECRET_KEY=${COOKIE_SECRET_KEY}
+      - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME:-session_totalcompmx}
+      # Email settings via Resend (optional - only needed for emails)
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      # External API tokens (REQUIRED for ETL worker)
+      # Get Banxico token: https://www.banxico.org.mx/SieAPIRest/service/v1/token
+      # Get INEGI token: https://www.inegi.org.mx/app/api/registrar.html
+      - BANXICO_TOKEN=${BANXICO_TOKEN}
+      - INEGI_TOKEN=${INEGI_TOKEN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+

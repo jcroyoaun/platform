@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.html
+LICENSE
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Development files
+*.zip
+.DS_Store
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+

@@ -1,0 +1,176 @@
+{{define "page:title"}}Dashboard API | TotalComp MX{{end}}
+
+{{define "page:main"}}
+<div style="width: 100%; max-width: 1000px; margin: 0 auto; padding: 2rem; box-sizing: border-box;">
+    <!-- Hero Section -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h1 style="color: white; font-size: 2rem; font-weight: 700; margin: 0;">
+                🔑 Dashboard de Desarrollador
+            </h1>
+            <form method="POST" action="/logout" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <button type="submit" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: background 0.2s;" 
+                        onmouseover="this.style.background='#dc2626'" 
+                        onmouseout="this.style.background='#ef4444'">
+                    🚪 Cerrar Sesión
+                </button>
+            </form>
+        </div>
+        <p style="color: #94a3b8; font-size: 1rem; margin: 0;">
+            Administra tus API keys e integra TotalComp MX en tus aplicaciones.
+        </p>
+    </div>
+
+    <!-- Email Verification Banner (Only show if NOT verified) -->
+    {{if not .User.EmailVerified}}
+    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 6px solid #f59e0b;">
+        <div style="display: flex; align-items: start; gap: 1rem;">
+            <div style="font-size: 2rem; line-height: 1;">📬</div>
+            <div style="flex: 1;">
+                <h3 style="color: #92400e; font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                    ⚠️ Verifica tu email para acceso completo
+                </h3>
+                <p style="color: #78350f; font-size: 0.875rem; margin: 0 0 1rem 0; line-height: 1.6;">
+                    Tu cuenta está limitada a <strong>10 llamadas API por día</strong> hasta que verifiques tu email. 
+                    Verifica tu cuenta para desbloquear <strong>100 llamadas/mes</strong> (Plan Hobby gratis).
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="mailto:{{.User.Email}}" style="display: inline-block; background: #0f172a; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.875rem; transition: transform 0.2s;"
+                       onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)'">
+                        📧 Revisar Email
+                    </a>
+                    <form action="/account/resend-verification" method="POST" style="margin: 0;">
+                        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                        <button type="submit" style="background: transparent; border: 2px solid #92400e; color: #92400e; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#92400e'; this.style.color='white'"
+                                onmouseout="this.style.background='transparent'; this.style.color='#92400e'">
+                            ❓ ¿No recibiste el email?
+                        </button>
+                    </form>
+                </div>
+                <p style="color: #a16207; font-size: 0.7rem; margin: 0.75rem 0 0 0;">
+                    💡 <strong>Tip:</strong> Revisa tu carpeta de spam. El email proviene de TotalComp MX.
+                </p>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <!-- API Key Section -->
+    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="color: #0f172a; font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">
+            Tu API Key
+        </h2>
+
+        {{if .User.ApiKey.Valid}}
+            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: #64748b; font-size: 0.875rem;">
+                    🔐 API Key Activa:
+                </label>
+                <div style="background: #0f172a; color: #10b981; padding: 1rem; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.875rem; word-break: break-all; margin-bottom: 1rem;">
+                    {{.User.ApiKey.String}}
+                </div>
+                <p style="color: #64748b; font-size: 0.75rem; margin: 0;">
+                    ⚠️ ¡Mantén esta clave en secreto! Nunca la subas a repositorios públicos.
+                </p>
+            </div>
+
+            <form method="POST" action="/account/api-key" style="margin-bottom: 1rem;">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" 
+                        onmouseover="this.style.background='#d97706'" 
+                        onmouseout="this.style.background='#f59e0b'"
+                        onclick="return confirm('Esto invalidará tu API key actual. ¿Estás seguro?');">
+                    🔄 Regenerar API Key
+                </button>
+            </form>
+        {{else}}
+            <div style="background: #fef3c7; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 1.5rem;">
+                <p style="color: #78350f; font-weight: 600; margin: 0 0 0.5rem 0;">
+                    ⚡ Aún no has generado una API Key
+                </p>
+                <p style="color: #92400e; font-size: 0.875rem; margin: 0;">
+                    Haz clic en el botón de abajo para generar tu primera API key.
+                </p>
+            </div>
+
+            <form method="POST" action="/account/api-key">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: transform 0.2s;" 
+                        onmouseover="this.style.transform='translateY(-2px)'" 
+                        onmouseout="this.style.transform='translateY(0)'">
+                    🚀 Generar API Key
+                </button>
+            </form>
+        {{end}}
+    </div>
+
+    <!-- Usage Stats -->
+    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="color: #0f172a; font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">
+            📊 Estadísticas de Uso
+        </h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 1.5rem; border-radius: 8px; color: white;">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                    Total de Llamadas
+                </div>
+                <div style="font-size: 2rem; font-weight: 700;">
+                    {{.User.ApiCallsCount}}
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1.5rem; border-radius: 8px; color: white;">
+                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                    Plan
+                </div>
+                <div style="font-size: 1.25rem; font-weight: 700;">
+                    Gratis (Hobby)
+                </div>
+                <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.25rem;">
+                    100 llamadas/mes
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start Guide -->
+    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="color: #0f172a; font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">
+            🚀 Inicio Rápido
+        </h2>
+
+        <p style="color: #64748b; margin-bottom: 1.5rem;">
+            Haz tu primera llamada a la API con este ejemplo:
+        </p>
+
+        <div style="background: #0f172a; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.875rem; overflow-x: auto; margin-bottom: 1.5rem;">
+<pre style="margin: 0; white-space: pre-wrap;">curl -X POST https://totalcomp.mx/api/v1/calculate \
+  -H "Authorization: Bearer TU_API_KEY_AQUI" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "salary": 50000,
+    "regime": "sueldos",
+    "has_aguinaldo": true,
+    "aguinaldo_days": 30
+  }'</pre>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="/developers" style="background: #6366f1; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background 0.2s;" 
+               onmouseover="this.style.background='#4f46e5'" 
+               onmouseout="this.style.background='#6366f1'">
+                📚 Documentación Completa
+            </a>
+            <a href="/" style="background: #e2e8f0; color: #0f172a; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background 0.2s;" 
+               onmouseover="this.style.background='#cbd5e1'" 
+               onmouseout="this.style.background='#e2e8f0'">
+                🧮 Probar Calculadora
+            </a>
+        </div>
+    </div>
+</div>
+{{end}}

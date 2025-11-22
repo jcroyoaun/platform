@@ -1,0 +1,124 @@
+{{define "page:title"}}Sign Up | TotalComp MX{{end}}
+
+{{define "page:main"}}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box;">
+    <div style="width: 100%; max-width: 450px;">
+        <!-- Logo/Branding -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">💰</div>
+            <h1 style="color: white; font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem 0;">
+                TotalComp MX
+            </h1>
+            <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">
+                Crea tu cuenta para acceder a la API
+            </p>
+        </div>
+
+        <!-- Signup Card -->
+        <div style="background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155;">
+            <h2 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem 0; text-align: center;">
+                Crear Cuenta
+            </h2>
+
+            <!-- Global Error Message -->
+            {{if .Form.Validator.HasErrors}}
+            <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                <p style="color: #991b1b; font-weight: 600; margin: 0 0 0.25rem 0; font-size: 0.875rem;">
+                    ⚠️ Hay errores en el formulario
+                </p>
+                <p style="color: #7f1d1d; margin: 0; font-size: 0.75rem;">
+                    Por favor corrige los campos marcados en rojo.
+                </p>
+            </div>
+            {{end}}
+
+            <form method="POST" action="/signup">
+                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                
+                <!-- Email Field -->
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; color: #f8fafc; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        📧 Email
+                    </label>
+                    <input 
+                        type="email" 
+                        name="Email" 
+                        value="{{.Form.Email}}"
+                        placeholder="tu@email.com"
+                        style="width: 100%; padding: 0.75rem; background: #0f172a; border: 2px solid {{if .Form.Validator.FieldErrors.Email}}#ef4444{{else}}#334155{{end}}; border-radius: 8px; color: #f8fafc; font-size: 0.875rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#6366f1'"
+                        onblur="this.style.borderColor='{{if .Form.Validator.FieldErrors.Email}}#ef4444{{else}}#334155{{end}}'"
+                        required>
+                    {{with .Form.Validator.FieldErrors.Email}}
+                    <p style="color: #ef4444; font-size: 0.75rem; margin: 0.5rem 0 0 0; font-weight: 500;">
+                        ❌ {{.}}
+                    </p>
+                    {{end}}
+                </div>
+
+                <!-- Password Field -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #f8fafc; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        🔒 Contraseña
+                    </label>
+                    <input 
+                        type="password" 
+                        name="Password"
+                        placeholder="Mínimo 8 caracteres"
+                        style="width: 100%; padding: 0.75rem; background: #0f172a; border: 2px solid {{if .Form.Validator.FieldErrors.Password}}#ef4444{{else}}#334155{{end}}; border-radius: 8px; color: #f8fafc; font-size: 0.875rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#6366f1'"
+                        onblur="this.style.borderColor='{{if .Form.Validator.FieldErrors.Password}}#ef4444{{else}}#334155{{end}}'"
+                        required>
+                    {{with .Form.Validator.FieldErrors.Password}}
+                    <p style="color: #ef4444; font-size: 0.75rem; margin: 0.5rem 0 0 0; font-weight: 500;">
+                        ❌ {{.}}
+                    </p>
+                    {{end}}
+                    <p style="color: #64748b; font-size: 0.7rem; margin: 0.5rem 0 0 0;">
+                        Usa al menos 8 caracteres con letras y números.
+                    </p>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.875rem; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 10px rgba(16, 185, 129, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)'">
+                    🚀 Crear Cuenta
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div style="margin: 1.5rem 0; text-align: center; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #334155;"></div>
+                <span style="position: relative; background: #1e293b; padding: 0 1rem; color: #64748b; font-size: 0.75rem; font-weight: 600;">
+                    O
+                </span>
+            </div>
+
+            <!-- Login Link -->
+            <div style="text-align: center;">
+                <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">
+                    ¿Ya tienes cuenta?
+                    <a href="/login" style="color: #10b981; text-decoration: none; font-weight: 600; transition: color 0.2s;"
+                       onmouseover="this.style.color='#059669'; this.style.textDecoration='underline'"
+                       onmouseout="this.style.color='#10b981'; this.style.textDecoration='none'">
+                        Inicia sesión aquí
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Legal Notice -->
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="color: #64748b; font-size: 0.7rem; line-height: 1.6;">
+                Al crear una cuenta, aceptas nuestros
+                <a href="/terms" style="color: #10b981; text-decoration: underline;">Términos y Condiciones</a>
+                y
+                <a href="/privacy" style="color: #10b981; text-decoration: underline;">Aviso de Privacidad</a>.
+            </p>
+        </div>
+    </div>
+</div>
+{{end}}
