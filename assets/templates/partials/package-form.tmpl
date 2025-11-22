@@ -1,0 +1,220 @@
+{{define "partials/package-form"}}
+{{- $index := .Index -}}
+{{- $name := .Name -}}
+{{- $borderColor := .BorderColor -}}
+{{- $showRemoveButton := .ShowRemoveButton -}}
+{{- $defaultChecked := .DefaultChecked -}}
+{{- $fiscalYear := .FiscalYear -}}
+
+<div id="package-{{add $index 1}}" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 3px solid {{$borderColor}}; {{if eq $index 1}}display: none; {{end}}position: relative;" data-package-index="{{$index}}">
+    {{if $showRemoveButton}}
+    <!-- Remove Button -->
+    <button type="button" onclick="setComparisonMode(false)" style="position: absolute; top: 1rem; right: 1rem; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s ease; z-index: 10;" title="Quitar comparación" onmouseover="this.style.background='#dc2626'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ef4444'; this.style.transform='scale(1)';">
+        🗑️
+    </button>
+    {{end}}
+    
+    <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+        <input type="text" name="PackageName[]" placeholder="Nombre del paquete (ej: Oferta Zillow)" value="{{$name}}" class="package-name-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; font-weight: 600; color: #1e293b;">
+    </div>
+
+    <!-- Regime -->
+    <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+            📋 Régimen Fiscal
+        </label>
+        <select name="Regime[]" class="regime-select" onchange="toggleRegime(this, {{$index}})" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+            <option value="sueldos_salarios">Sueldos y Salarios</option>
+            <option value="resico">RESICO</option>
+        </select>
+    </div>
+
+    <!-- Currency Selection (only for RESICO) -->
+    <div class="currency-selection-{{$index}}" style="display: none; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                    💵 Moneda
+                </label>
+                <select name="Currency[]" onchange="toggleExchangeRate(this, {{$index}})" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer;">
+                    <option value="MXN">MXN (Pesos)</option>
+                    <option value="USD">USD (Dólares)</option>
+                </select>
+            </div>
+            <div class="exchange-rate-input-{{$index}}" style="display: none;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;" title="Tipo de cambio USD/MXN actualizado diariamente desde Banxico">
+                    💱 Tipo de Cambio
+                </label>
+                <input type="text" name="ExchangeRate[]" placeholder="{{if $fiscalYear}}{{formatFloat $fiscalYear.USDMXNRate 4}}{{else}}20.00{{end}}" value="{{if $fiscalYear}}{{formatFloat $fiscalYear.USDMXNRate 4}}{{else}}{{end}}" class="money-input" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
+                    <div style="font-size: 0.7rem; color: #1e40af; line-height: 1.4;">
+                        💡 <strong>Tipo de cambio oficial Banxico:</strong> {{if $fiscalYear}}${{formatFloat $fiscalYear.USDMXNRate 4}}{{else}}$20.00{{end}} MXN/USD
+                        <div style="margin-top: 0.25rem; font-size: 0.65rem; color: #64748b;">Actualizado automáticamente a las 14:00 CST</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary with Frequency -->
+    <div style="margin-bottom: 1rem;">
+        <label class="salary-label-{{$index}}" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+            💰 Salario Bruto
+        </label>
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+            <input type="text" name="GrossMonthlySalary[]" placeholder="Ej: 12,000" class="salary-input" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+            <select name="PaymentFrequency[]" class="payment-frequency-select-{{$index}}" onchange="toggleSalaryLabel(this, {{$index}})" style="width: 120px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.75rem; background: white; cursor: pointer;">
+                <option value="monthly">Mensual</option>
+                <option value="biweekly">Quincenal</option>
+                <option value="weekly">Semanal</option>
+                <option value="daily" style="display: none;" disabled>Diario</option>
+                <option value="hourly" style="display: none;" disabled>Por Hora</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Hours per week (only for hourly) -->
+    <div class="hours-per-week-{{$index}}" style="display: none; margin-bottom: 1rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+            ⏰ Horas por Semana
+        </label>
+        <input type="number" name="HoursPerWeek[]" value="40" min="1" max="168" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+    </div>
+
+    <!-- Unpaid Vacation Days (RESICO only) -->
+    <div class="unpaid-vacation-{{$index}}" style="display: none; margin-bottom: 1rem;">
+        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+            📅 Días de Descanso (No pagados)
+        </label>
+        <input type="number" name="UnpaidVacationDays[]" value="0" min="0" max="365" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+            <em>Como RESICO, si no trabajas, no cobras. Esto ajustará tu ingreso anual real.</em>
+        </p>
+    </div>
+
+    <!-- Benefits Section (for Sueldos) -->
+    <div class="benefits-section-{{$index}}" style="{{if ne $index 0}}display: none; {{end}}background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">🎁 Prestaciones</div>
+        
+        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+            <input type="checkbox" name="HasAguinaldo[]" value="{{$index}}" {{if $defaultChecked}}checked{{end}} style="margin-right: 0.5rem;">
+            Aguinaldo <input type="number" name="AguinaldoDays[]" value="15" min="15" max="30" style="width: 60px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días
+        </label>
+
+        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+            <input type="checkbox" name="HasValesDespensa[]" value="{{$index}}" {{if $defaultChecked}}checked{{end}} style="margin-right: 0.5rem;">
+            Vales de despensa $<input type="text" name="ValesDespensaAmount[]" value="3439" class="money-input" placeholder="3,439" data-max="3439" style="width: 80px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> /mes
+        </label>
+
+        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+            <input type="checkbox" name="HasPrimaVacacional[]" value="{{$index}}" {{if $defaultChecked}}checked{{end}} style="margin-right: 0.5rem;">
+            Prima Vacacional: <input type="number" name="VacationDays[]" value="12" min="12" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;"> días @ <input type="number" name="PrimaVacacionalPercent[]" value="25" min="25" style="width: 50px; padding: 0.25rem; margin-left: 0.25rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+        </label>
+
+        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+            <input type="checkbox" name="HasFondoAhorro[]" value="{{$index}}" {{if $defaultChecked}}checked{{end}} style="margin-right: 0.5rem;">
+            Fondo de Ahorro <input type="number" name="FondoAhorroPercent[]" value="13" min="1" max="13" step="1" style="width: 50px; padding: 0.25rem; margin-left: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">%
+        </label>
+
+        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.875rem;">
+            <input type="checkbox" name="HasInfonavitCredit[]" value="{{$index}}" style="margin-right: 0.5rem;">
+            🏠 Infonavit (Aportación Patronal 5%)
+        </label>
+    </div>
+
+    <!-- Otras Prestaciones -->
+    <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-size: 0.875rem; font-weight: 600; color: #92400e;">✨ Otras Prestaciones</span>
+            <button type="button" onclick="addBenefit({{$index}})" style="background: #059669; color: white; padding: 0.25rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">+ Agregar</button>
+        </div>
+        <div id="otherBenefits-{{$index}}" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- Dynamic benefits will be added here -->
+        </div>
+    </div>
+
+    <div style="background: #dbeafe; padding: 0.75rem; border-radius: 6px; font-size: 0.75rem; color: #1e40af;">
+        <strong>💡 Tip:</strong> Otras prestaciones pueden incluir apoyo para internet, luz, gasolina, Bonos anuales, etc.
+    </div>
+
+    <!-- Equity / RSUs Section -->
+    <div style="margin-top: 1.5rem;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.75rem;">
+            <input 
+                type="checkbox" 
+                name="HasEquity[]"
+                value="{{$index}}"
+                class="equity-toggle-checkbox"
+                data-package-index="{{$index}}"
+                style="width: 18px; height: 18px; cursor: pointer;">
+            <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                📊 ¿Incluir Equity / RSUs?
+            </span>
+        </label>
+        
+        <div class="equity-section-{{$index}}" style="display: none; padding: 1.5rem; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+                📊 Equity / RSUs
+            </h3>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                    💰 Initial Equity Grant (USD)
+                </label>
+                <input 
+                    type="text" 
+                    name="InitialEquityUSD[]" 
+                    placeholder="Ej: 30000" 
+                    class="money-input" 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+            </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input 
+                    type="checkbox" 
+                    name="HasRefreshers[]" 
+                    value="{{$index}}"
+                    class="refresher-checkbox"
+                    style="width: 18px; height: 18px; cursor: pointer;">
+                <span style="font-weight: 600; color: #1e293b; font-size: 0.875rem;">
+                    ✨ Annual Refreshers?
+                </span>
+            </label>
+        </div>
+        
+        <div class="refresher-fields-{{$index}}" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        Min Refresher (USD/año)
+                    </label>
+                    <input 
+                        type="text" 
+                        name="RefresherMinUSD[]" 
+                        placeholder="8000"
+                        class="money-input" 
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; font-size: 0.875rem;">
+                        Max Refresher (USD/año)
+                    </label>
+                    <input 
+                        type="text" 
+                        name="RefresherMaxUSD[]" 
+                        placeholder="12000"
+                        class="money-input" 
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+                </div>
+            </div>
+            
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 0.75rem; color: #1e40af;">
+                💡 Los refreshers típicamente varían según performance (e.g., $8k-12k USD/año)
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

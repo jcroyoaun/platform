@@ -43,6 +43,8 @@ var TemplateFuncs = template.FuncMap{
 
 	"urlSetParam": urlSetParam,
 	"urlDelParam": urlDelParam,
+
+	"dict": dict,
 }
 
 func formatTime(format string, t time.Time) string {
@@ -186,6 +188,24 @@ func urlDelParam(u *url.URL, key string) *url.URL {
 
 	nu.RawQuery = values.Encode()
 	return &nu
+}
+
+func dict(values ...any) (map[string]any, error) {
+	if len(values)%2 != 0 {
+		return nil, fmt.Errorf("dict requires an even number of arguments (key-value pairs), got %d", len(values))
+	}
+
+	result := make(map[string]any, len(values)/2)
+
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("dict key must be a string, got %T", values[i])
+		}
+		result[key] = values[i+1]
+	}
+
+	return result, nil
 }
 
 func toInt64(i any) (int64, error) {
