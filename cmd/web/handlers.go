@@ -17,11 +17,12 @@ import (
 )
 
 type OtherBenefit struct {
-	Name       string
-	Amount     float64
-	TaxFree    bool
-	Currency   string
-	Cadence    string // monthly, annual, etc.
+	Name         string
+	Amount       float64
+	TaxFree      bool
+	Currency     string
+	Cadence      string // monthly, annual, etc.
+	IsPercentage bool   // true if Amount is a percentage of gross annual salary
 }
 
 type PackageResult struct {
@@ -56,6 +57,20 @@ type PackageInput struct {
 	HasRefreshers           bool
 	RefresherMinUSD         string
 	RefresherMaxUSD         string
+}
+
+func (app *application) clearSession(w http.ResponseWriter, r *http.Request) {
+	// Clear all session data
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	
+	app.sessionManager.Remove(r.Context(), "packageInputs")
+	app.sessionManager.Remove(r.Context(), "calculationResults")
+	
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -330,12 +345,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 			otherTaxFreeKey := fmt.Sprintf("OtherBenefitTaxFree-%d[]", i)
 			otherCurrencyKey := fmt.Sprintf("OtherBenefitCurrency-%d[]", i)
 			otherCadenceKey := fmt.Sprintf("OtherBenefitCadence-%d[]", i)
+			otherTypeKey := fmt.Sprintf("OtherBenefitType-%d[]", i)
 			
 			otherNames := r.Form[otherNamesKey]
 			otherAmounts := r.Form[otherAmountsKey]
 			otherTaxFree := r.Form[otherTaxFreeKey]
 			otherCurrency := r.Form[otherCurrencyKey]
 			otherCadence := r.Form[otherCadenceKey]
+			otherTypes := r.Form[otherTypeKey]
 			
 			// Build otherBenefits slice
 			for j := 0; j < len(otherNames); j++ {
@@ -372,12 +389,21 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 					benefitCadence = otherCadence[j]
 				}
 				
+				// Check if this is a percentage benefit
+				isPercentage := false
+				if j < len(otherTypes) && otherTypes[j] == "percentage" {
+					isPercentage = true
+					// For percentage, force annual cadence
+					benefitCadence = "annual"
+				}
+				
 				otherBenefits = append(otherBenefits, OtherBenefit{
-					Name:     name,
-					Amount:   amount,
-					TaxFree:  isTaxFree,
-					Currency: benefitCurrency,
-					Cadence:  benefitCadence,
+					Name:         name,
+					Amount:       amount,
+					TaxFree:      isTaxFree,
+					Currency:     benefitCurrency,
+					Cadence:      benefitCadence,
+					IsPercentage: isPercentage,
 				})
 			}
 

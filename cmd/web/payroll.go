@@ -44,11 +44,20 @@ func (app *application) calculateRESICO(
 	var otherBenefitsMonthlyNet float64
 	var otherBenefitsAnnualNet float64
 	
+	// Calculate gross annual salary for percentage calculations
+	grossAnnualSalary := monthlyIncome * 12.0
+	
 	for _, benefit := range otherBenefits {
-		// Convert to MXN if needed
+		// Calculate benefit amount (handle percentage vs fixed)
 		benefitAmount := benefit.Amount
-		if benefit.Currency == "USD" {
-			benefitAmount = benefit.Amount * exchangeRate
+		if benefit.IsPercentage {
+			// Percentage of gross annual salary
+			benefitAmount = grossAnnualSalary * (benefit.Amount / 100.0)
+		} else {
+			// Fixed amount - convert to MXN if needed
+			if benefit.Currency == "USD" {
+				benefitAmount = benefit.Amount * exchangeRate
+			}
 		}
 		
 		benefitResult := database.OtherBenefitResult{
@@ -62,10 +71,12 @@ func (app *application) calculateRESICO(
 			// Tax-free benefits
 			benefitResult.ISR = 0
 			benefitResult.Net = benefitAmount
+			app.logger.Info("RESICO other benefit (tax-free)", "name", benefit.Name, "gross", benefitAmount, "net", benefitResult.Net)
 		} else {
 			// Taxable benefits - apply RESICO rate
 			benefitResult.ISR = benefitAmount * resicoBracket.ApplicableRate
 			benefitResult.Net = benefitAmount - benefitResult.ISR
+			app.logger.Info("RESICO other benefit (taxable)", "name", benefit.Name, "gross", benefitAmount, "isr", benefitResult.ISR, "net", benefitResult.Net, "rate", resicoBracket.ApplicableRate)
 		}
 		
 		result.OtherBenefits = append(result.OtherBenefits, benefitResult)
@@ -149,11 +160,20 @@ func (app *application) calculateSalaryWithBenefits(
 	var otherBenefitsMonthlyNet float64
 	var otherBenefitsAnnualNet float64
 	
+	// Calculate gross annual salary for percentage calculations
+	grossAnnualSalary := grossMonthlySalary * 12.0
+	
 	for _, benefit := range otherBenefits {
-		// Convert to MXN if needed
+		// Calculate benefit amount (handle percentage vs fixed)
 		benefitAmount := benefit.Amount
-		if benefit.Currency == "USD" {
-			benefitAmount = benefit.Amount * exchangeRate
+		if benefit.IsPercentage {
+			// Percentage of gross annual salary
+			benefitAmount = grossAnnualSalary * (benefit.Amount / 100.0)
+		} else {
+			// Fixed amount - convert to MXN if needed
+			if benefit.Currency == "USD" {
+				benefitAmount = benefit.Amount * exchangeRate
+			}
 		}
 		
 		benefitResult := database.OtherBenefitResult{
@@ -167,6 +187,7 @@ func (app *application) calculateSalaryWithBenefits(
 			// Tax-free benefits
 			benefitResult.ISR = 0
 			benefitResult.Net = benefitAmount
+			app.logger.Info("Other benefit (tax-free)", "name", benefit.Name, "gross", benefitAmount, "net", benefitResult.Net)
 		} else {
 			// Taxable benefits
 			isrBrackets, err := app.db.GetISRBrackets(fiscalYear.ID)
@@ -178,8 +199,10 @@ func (app *application) calculateSalaryWithBenefits(
 			// Use standard ISR for monthly benefits (isolated calculation)
 			if benefit.Cadence == "annual" {
 				benefitResult.ISR = calculateTaxArt174(grossMonthlySalary, benefitAmount, isrBrackets)
+				app.logger.Info("Other benefit (annual taxable)", "name", benefit.Name, "gross", benefitAmount, "isr", benefitResult.ISR, "net", benefitAmount-benefitResult.ISR, "monthly_salary", grossMonthlySalary)
 			} else {
 				benefitResult.ISR = calculateISR(benefitAmount, isrBrackets)
+				app.logger.Info("Other benefit (monthly taxable)", "name", benefit.Name, "gross", benefitAmount, "isr", benefitResult.ISR, "net", benefitAmount-benefitResult.ISR)
 			}
 			benefitResult.Net = benefitAmount - benefitResult.ISR
 		}

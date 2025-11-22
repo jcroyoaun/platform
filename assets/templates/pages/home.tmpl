@@ -54,7 +54,7 @@
         <input type="hidden" id="saved-pkg-{{$idx}}-refresher-max" value="{{$pkg.RefresherMaxUSD}}">
         <!-- Otras prestaciones -->
         {{range $jdx, $benefit := $pkg.OtherBenefits}}
-        <input type="hidden" class="saved-other-benefit-{{$idx}}" data-name="{{$benefit.Name}}" data-amount="{{$benefit.Amount}}" data-taxfree="{{$benefit.TaxFree}}" data-currency="{{$benefit.Currency}}" data-cadence="{{$benefit.Cadence}}">
+        <input type="hidden" class="saved-other-benefit-{{$idx}}" data-name="{{$benefit.Name}}" data-amount="{{$benefit.Amount}}" data-taxfree="{{$benefit.TaxFree}}" data-currency="{{$benefit.Currency}}" data-cadence="{{$benefit.Cadence}}" data-ispercentage="{{$benefit.IsPercentage}}">
         {{end}}
         {{end}}
         {{end}}
@@ -572,26 +572,45 @@ function addBenefit(packageIndex, savedBenefit = null) {
     const taxFree = savedBenefit ? savedBenefit.taxFree : false;
     const currency = savedBenefit ? savedBenefit.currency : 'MXN';
     const cadence = savedBenefit ? savedBenefit.cadence : 'monthly';
+    const isPercentage = savedBenefit ? (savedBenefit.isPercentage || false) : false;
     
     benefitDiv.innerHTML = `
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%;">
             <input type="text" name="OtherBenefitName-${packageIndex}[]" placeholder="Ej: Bono anual" value="${name}" style="flex: 1; min-width: 120px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">
-            <input type="text" name="OtherBenefitAmount-${packageIndex}[]" placeholder="$1,500" value="${amount}" class="money-input" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">
-            <select name="OtherBenefitCurrency-${packageIndex}[]" class="benefit-currency-select" onchange="toggleBenefitBanxicoNotice('${benefitId}')" style="width: 70px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem;">
+            
+            <select name="OtherBenefitType-${packageIndex}[]" class="benefit-type-select" onchange="toggleBenefitInputType('${benefitId}')" style="width: 110px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem; background: #f8fafc;">
+                <option value="fixed" ${!isPercentage ? 'selected' : ''}>💵 Monto fijo</option>
+                <option value="percentage" ${isPercentage ? 'selected' : ''}>📊 % Salario</option>
+            </select>
+            
+            <div class="benefit-amount-container" style="display: flex; gap: 0.25rem; align-items: center;">
+                <input type="text" name="OtherBenefitAmount-${packageIndex}[]" placeholder="${isPercentage ? '10' : '$1,500'}" value="${amount}" class="money-input benefit-amount-input" data-benefit-id="${benefitId}" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.75rem;">
+                <span class="percentage-label" style="display: ${isPercentage ? 'inline' : 'none'}; font-size: 0.75rem; color: #64748b; font-weight: 600;">%</span>
+            </div>
+            
+            <select name="OtherBenefitCurrency-${packageIndex}[]" class="benefit-currency-select" onchange="toggleBenefitBanxicoNotice('${benefitId}')" style="width: 70px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem; ${isPercentage ? 'display: none;' : ''}">
                 <option value="MXN" ${currency === 'MXN' ? 'selected' : ''}>MXN</option>
                 <option value="USD" ${currency === 'USD' ? 'selected' : ''}>USD</option>
             </select>
-            <select name="OtherBenefitCadence-${packageIndex}[]" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem;">
+            
+            <select name="OtherBenefitCadence-${packageIndex}[]" class="benefit-cadence-select" style="width: 90px; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.7rem; ${isPercentage ? 'display: none;' : ''}">
                 <option value="monthly" ${cadence === 'monthly' ? 'selected' : ''}>Mensual</option>
                 <option value="annual" ${cadence === 'annual' ? 'selected' : ''}>Anual</option>
             </select>
+            
+            <!-- Hidden input for percentage bonuses (always annual) -->
+            <input type="hidden" name="OtherBenefitCadence-${packageIndex}[]" class="benefit-cadence-hidden" value="annual" style="display: ${isPercentage ? 'inline' : 'none'};">
+            <span class="percentage-cadence-label" style="display: ${isPercentage ? 'inline' : 'none'}; font-size: 0.7rem; color: #64748b; font-weight: 500; padding: 0.5rem; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">📅 Anual</span>
+            
             <label style="display: flex; align-items: center; white-space: nowrap; font-size: 0.7rem; cursor: pointer;">
                 <input type="checkbox" name="OtherBenefitTaxFree-${packageIndex}[]" value="${benefitCounters[packageIndex]}" ${taxFree ? 'checked' : ''} style="margin-right: 0.25rem;">
                 Libre ISR
             </label>
+            
             <button type="button" onclick="removeBenefit('${benefitId}')" style="background: #ef4444; color: white; padding: 0.35rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">🗑️</button>
         </div>
-        <div id="banxico-notice-${benefitId}" class="banxico-notice" style="display: ${currency === 'USD' ? 'block' : 'none'}; width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
+        
+        <div id="banxico-notice-${benefitId}" class="banxico-notice" style="display: ${currency === 'USD' && !isPercentage ? 'block' : 'none'}; width: 100%; margin-top: 0.5rem; padding: 0.5rem; background: #dbeafe; border-left: 3px solid #3b82f6; border-radius: 4px;">
             <div style="font-size: 0.65rem; color: #1e40af; line-height: 1.4;">
                 💡 <strong>Tipo de cambio oficial Banxico:</strong> {{if .FiscalYear}}${{formatFloat .FiscalYear.USDMXNRate 4}}{{else}}$20.00{{end}} MXN/USD
                 <div style="margin-top: 0.25rem; font-size: 0.6rem; color: #64748b;">Actualizado automáticamente a las 14:00 CST</div>
@@ -600,7 +619,7 @@ function addBenefit(packageIndex, savedBenefit = null) {
     `;
     container.appendChild(benefitDiv);
     
-    // Attach comma formatting to money inputs
+    // Attach comma formatting to money inputs (but not for percentage inputs)
     const moneyInputs = benefitDiv.querySelectorAll('.money-input');
     attachCommaFormatting(moneyInputs);
 }
@@ -612,15 +631,69 @@ function removeBenefit(benefitId) {
     }
 }
 
+function toggleBenefitInputType(benefitId) {
+    const benefitDiv = document.getElementById(benefitId);
+    if (!benefitDiv) return;
+    
+    const typeSelect = benefitDiv.querySelector('.benefit-type-select');
+    const amountInput = benefitDiv.querySelector('.benefit-amount-input');
+    const percentageLabel = benefitDiv.querySelector('.percentage-label');
+    const currencySelect = benefitDiv.querySelector('.benefit-currency-select');
+    const cadenceSelect = benefitDiv.querySelector('.benefit-cadence-select');
+    const cadenceHidden = benefitDiv.querySelector('.benefit-cadence-hidden');
+    const percentageCadenceLabel = benefitDiv.querySelector('.percentage-cadence-label');
+    const banxicoNotice = document.getElementById(`banxico-notice-${benefitId}`);
+    
+    if (!typeSelect || !amountInput) return;
+    
+    const isPercentage = typeSelect.value === 'percentage';
+    
+    // Clear the input value when switching types
+    amountInput.value = '';
+    
+    if (isPercentage) {
+        // Percentage mode
+        amountInput.placeholder = '10';
+        percentageLabel.style.display = 'inline';
+        currencySelect.style.display = 'none';
+        cadenceSelect.style.display = 'none';
+        cadenceHidden.style.display = 'inline';
+        percentageCadenceLabel.style.display = 'inline';
+        banxicoNotice.style.display = 'none';
+        
+        // Remove comma formatting for percentages
+        amountInput.classList.remove('money-input');
+    } else {
+        // Fixed amount mode
+        amountInput.placeholder = '$1,500';
+        percentageLabel.style.display = 'none';
+        currencySelect.style.display = 'block';
+        cadenceSelect.style.display = 'block';
+        cadenceHidden.style.display = 'none';
+        percentageCadenceLabel.style.display = 'none';
+        
+        // Re-enable comma formatting
+        amountInput.classList.add('money-input');
+        attachCommaFormatting([amountInput]);
+        
+        // Show Banxico notice if USD
+        if (currencySelect.value === 'USD') {
+            banxicoNotice.style.display = 'block';
+        }
+    }
+}
+
 function toggleBenefitBanxicoNotice(benefitId) {
     const benefitDiv = document.getElementById(benefitId);
     if (!benefitDiv) return;
     
     const currencySelect = benefitDiv.querySelector('.benefit-currency-select');
     const banxicoNotice = document.getElementById(`banxico-notice-${benefitId}`);
+    const typeSelect = benefitDiv.querySelector('.benefit-type-select');
     
-    if (currencySelect && banxicoNotice) {
-        if (currencySelect.value === 'USD') {
+    if (currencySelect && banxicoNotice && typeSelect) {
+        // Only show Banxico notice for USD and fixed amount (not percentage)
+        if (currencySelect.value === 'USD' && typeSelect.value === 'fixed') {
             banxicoNotice.style.display = 'block';
         } else {
             banxicoNotice.style.display = 'none';
@@ -837,7 +910,8 @@ function loadSavedValues() {
                 amount: benefitInput.getAttribute('data-amount'),
                 taxFree: benefitInput.getAttribute('data-taxfree') === 'true',
                 currency: benefitInput.getAttribute('data-currency') || 'MXN',
-                cadence: benefitInput.getAttribute('data-cadence') || 'monthly'
+                cadence: benefitInput.getAttribute('data-cadence') || 'monthly',
+                isPercentage: benefitInput.getAttribute('data-ispercentage') === 'true'
             };
             addBenefit(idx, benefit);
         });
@@ -850,8 +924,20 @@ function clearAllInputs() {
         return;
     }
     
-    // Redirect to homepage (clears session)
-    window.location.href = '/';
+    // Make a POST request to clear the session
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/clear';
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = '{{.CSRFToken}}';
+    form.appendChild(csrfInput);
+    
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // Toggle refresher fields

@@ -35,6 +35,7 @@ func (app *application) routes() http.Handler {
 
 		// Public pages
 		mux.HandleFunc("/", app.home, "GET", "POST")
+		mux.HandleFunc("/clear", app.clearSession, "POST")
 		mux.HandleFunc("/calculator", app.salaryCalculator, "GET", "POST")
 		mux.HandleFunc("/export-pdf", app.exportPDF, "GET")
 		mux.HandleFunc("/privacy", app.privacy, "GET")
