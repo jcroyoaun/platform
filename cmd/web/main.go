@@ -38,8 +38,45 @@ func init() {
 func main() {
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{Level: slog.LevelDebug}))
 
-	err := run(logger)
-	if err != nil {
+	var cfg config
+	
+	// Config Loading (Env Vars)
+	cfg.worker.banxicoToken = env.GetString("BANXICO_TOKEN", "")
+	cfg.worker.inegiToken = env.GetString("INEGI_TOKEN", "")
+	cfg.resend.apiKey = env.GetString("RESEND_API_KEY", "")
+	cfg.cookie.secretKey = env.GetString("COOKIE_SECRET_KEY", "v2zn7or6otz36wqjt7b2qkj2xj3g7ug5")
+
+	dbUser := env.GetString("DB_USER", "totalcomp_app")
+	dbPassword := env.GetString("DB_PASSWORD", "")
+	dbHost := env.GetString("DB_HOST", "localhost")
+	dbName := env.GetString("DB_NAME", "totalcomp")
+	// database.New prepends postgres:// so we construct user:pass@host/dbname
+	cfg.db.dsn = fmt.Sprintf("%s:%s@%s/%s?sslmode=require", dbUser, dbPassword, dbHost, dbName)
+
+	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:3080")
+	cfg.httpPort = env.GetInt("HTTP_PORT", 3080)
+	cfg.autoHTTPS.domain = env.GetString("AUTO_HTTPS_DOMAIN", "")
+	cfg.autoHTTPS.email = env.GetString("AUTO_HTTPS_EMAIL", "admin@github.com/jcroyoaun/totalcompmx")
+	cfg.autoHTTPS.staging = env.GetBool("AUTO_HTTPS_STAGING", false)
+	cfg.basicAuth.username = env.GetString("BASIC_AUTH_USERNAME", "admin")
+	cfg.basicAuth.hashedPassword = env.GetString("BASIC_AUTH_HASHED_PASSWORD", "$2a$10$jRb2qniNcoCyQM23T59RfeEQUbgdAXfR6S0scynmKfJa5Gj3arGJa")
+	cfg.db.automigrate = env.GetBool("DB_AUTOMIGRATE", true)
+	cfg.notifications.email = env.GetString("NOTIFICATIONS_EMAIL", "")
+	cfg.session.cookieName = env.GetString("SESSION_COOKIE_NAME", "session_totalcomp")
+	cfg.resend.from = env.GetString("RESEND_FROM", "TotalComp MX <hola@totalcomp.mx>")
+
+	// CLI Switch
+	task := flag.String("task", "server", "Task to execute (server, migrate, fetch-banxico, fetch-uma)")
+	showVersion := flag.Bool("version", false, "display version and exit")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("version: %s\n", version.Get())
+		os.Exit(0)
+	}
+
+	// Execution Logic
+	if err := run(logger, cfg, *task); err != nil {
 		trace := string(debug.Stack())
 		logger.Error(err.Error(), "trace", trace)
 		os.Exit(1)
@@ -87,56 +124,24 @@ type application struct {
 	logger         *slog.Logger
 	mailer         *smtp.Mailer
 	sessionManager *scs.SessionManager
+	worker         *worker.Worker
 	wg             sync.WaitGroup
 }
 
-func run(logger *slog.Logger) error {
-	var cfg config
-
-	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:3080")
-	cfg.httpPort = env.GetInt("HTTP_PORT", 3080)
-	cfg.autoHTTPS.domain = env.GetString("AUTO_HTTPS_DOMAIN", "")
-	cfg.autoHTTPS.email = env.GetString("AUTO_HTTPS_EMAIL", "admin@github.com/jcroyoaun/totalcompmx")
-	cfg.autoHTTPS.staging = env.GetBool("AUTO_HTTPS_STAGING", false)
-	cfg.basicAuth.username = env.GetString("BASIC_AUTH_USERNAME", "admin")
-	cfg.basicAuth.hashedPassword = env.GetString("BASIC_AUTH_HASHED_PASSWORD", "$2a$10$jRb2qniNcoCyQM23T59RfeEQUbgdAXfR6S0scynmKfJa5Gj3arGJa")
-	cfg.cookie.secretKey = env.GetString("COOKIE_SECRET_KEY", "v2zn7or6otz36wqjt7b2qkj2xj3g7ug5")
-	cfg.db.dsn = env.GetString("DB_DSN", "user:pass@localhost:5432/db")
-	cfg.db.automigrate = env.GetBool("DB_AUTOMIGRATE", true)
-	cfg.notifications.email = env.GetString("NOTIFICATIONS_EMAIL", "")
-	cfg.session.cookieName = env.GetString("SESSION_COOKIE_NAME", "session_uprn7vcq")
-	cfg.resend.apiKey = env.GetString("RESEND_API_KEY", "")
-	cfg.resend.from = env.GetString("RESEND_FROM", "TotalComp MX <hola@totalcomp.mx>")
-	cfg.worker.banxicoToken = env.GetString("BANXICO_TOKEN", "")
-	cfg.worker.inegiToken = env.GetString("INEGI_TOKEN", "")
-
-	showVersion := flag.Bool("version", false, "display version and exit")
-
-	flag.Parse()
-
-	if *showVersion {
-		fmt.Printf("version: %s\n", version.Get())
-		return nil
-	}
-
+func run(logger *slog.Logger, cfg config, task string) error {
 	db, err := database.New(cfg.db.dsn)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
+	
+	// Start database connection pool monitoring
+	db.MonitorConnectionPool()
 
-	if cfg.db.automigrate {
-		err = db.MigrateUp()
-		if err != nil {
-			return err
-		}
-	}
-
-	// Initialize mailer with Resend
-	// If no API key is provided, use mock mailer for testing
+	// Initialize mailer
 	var mailer *smtp.Mailer
 	if cfg.resend.apiKey == "" {
-		logger.Warn("RESEND_API_KEY not set, using mock mailer (emails will not be sent)")
+		logger.Warn("RESEND_API_KEY not set, using mock mailer")
 		mailer = smtp.NewMockMailer(cfg.resend.from)
 	} else {
 		mailer = smtp.NewMailer(cfg.resend.apiKey, cfg.resend.from)
@@ -148,22 +153,54 @@ func run(logger *slog.Logger) error {
 	sessionManager.Cookie.Name = cfg.session.cookieName
 	sessionManager.Cookie.Secure = true
 
+	etlWorker := worker.New(db, logger, cfg.worker.banxicoToken, cfg.worker.inegiToken)
+
 	app := &application{
 		config:         cfg,
 		db:             db,
 		logger:         logger,
 		mailer:         mailer,
 		sessionManager: sessionManager,
+		worker:         etlWorker,
 	}
 
-	// Start background ETL worker for financial data updates
-	etlWorker := worker.New(db, logger, cfg.worker.banxicoToken, cfg.worker.inegiToken)
-	go etlWorker.Start()
-	logger.Info("etl worker started", "banxico_enabled", true, "inegi_enabled", true)
+	switch task {
+	case "server":
+		// Note: We do not start the background worker scheduler in server mode 
+		// because we use CronJobs for those tasks now.
+		
+		// Run migrations if automigrate is enabled (or we could rely on init container)
+		if cfg.db.automigrate {
+			if err = db.MigrateUp(); err != nil {
+				return err
+			}
+		}
 
-	if cfg.autoHTTPS.domain != "" {
-		return app.serveAutoHTTPS()
+		if cfg.autoHTTPS.domain != "" {
+			return app.serveAutoHTTPS()
+		}
+		return app.serveHTTP()
+
+	case "migrate":
+		// Initialize DB connection done above
+		if err := app.db.MigrateUp(); err != nil {
+			return err
+		}
+		return nil
+
+	case "fetch-banxico":
+		if err := app.worker.FetchUSDMXN(); err != nil {
+			return err
+		}
+		return nil
+
+	case "fetch-uma":
+		if err := app.worker.FetchUMA(); err != nil {
+			return err
+		}
+		return nil
+
+	default:
+		return fmt.Errorf("unknown task: %s", task)
 	}
-
-	return app.serveHTTP()
 }

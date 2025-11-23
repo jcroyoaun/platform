@@ -6,6 +6,10 @@ import (
 	"log/slog"
 	"net/http"
 
+	"strconv"
+	"time"
+
+	"github.com/jcroyoaun/totalcompmx/internal/metrics"
 	"github.com/jcroyoaun/totalcompmx/internal/response"
 
 	"github.com/justinas/nosurf"
@@ -251,5 +255,40 @@ func (app *application) requireAPIKey(next http.Handler) http.Handler {
 		r = contextSetAuthenticatedUser(r, user)
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) prometheusMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip metrics endpoint to avoid pollution
+		if r.URL.Path == "/metrics" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		start := time.Now()
+
+		// Use the custom response writer to capture status code
+		// Check if w is already a MetricsResponseWriter (e.g. from logAccess)
+		var mw *response.MetricsResponseWriter
+		if v, ok := w.(*response.MetricsResponseWriter); ok {
+			mw = v
+		} else {
+			mw = response.NewMetricsResponseWriter(w)
+		}
+
+		// Increment active requests
+		metrics.ActiveRequests.Inc()
+		defer metrics.ActiveRequests.Dec()
+
+		// If we wrapped it, use mw, otherwise w is already mw
+		next.ServeHTTP(mw, r)
+
+		duration := time.Since(start).Seconds()
+		status := strconv.Itoa(mw.StatusCode)
+
+		// Record metrics
+		metrics.RequestDuration.WithLabelValues(r.Method, r.URL.Path, status).Observe(duration)
+		metrics.RequestsTotal.WithLabelValues(r.Method, r.URL.Path, status).Inc()
 	})
 }

@@ -136,6 +136,16 @@ func (w *Worker) scheduleINEGI() {
 	}
 }
 
+// FetchUSDMXN triggers an immediate update of the USD/MXN exchange rate
+func (w *Worker) FetchUSDMXN() error {
+	return w.updateExchangeRate()
+}
+
+// FetchUMA triggers an immediate update of UMA values
+func (w *Worker) FetchUMA() error {
+	return w.updateUMA()
+}
+
 // updateExchangeRate fetches and updates USD/MXN rate from Banxico
 func (w *Worker) updateExchangeRate() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

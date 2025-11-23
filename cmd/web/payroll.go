@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/jcroyoaun/totalcompmx/internal/database"
+	"github.com/jcroyoaun/totalcompmx/internal/metrics"
 )
 
 // calculateRESICO performs RESICO regime calculation (flat rate, no IMSS, no subsidio)
@@ -15,6 +17,13 @@ func (app *application) calculateRESICO(
 	exchangeRate float64,
 	fiscalYear database.FiscalYear,
 ) (database.SalaryCalculation, error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start).Seconds()
+		metrics.TotalCompCalculations.Inc()
+		metrics.CalculationDuration.Observe(duration)
+	}()
+
 	result := database.SalaryCalculation{
 		GrossSalary:        monthlyIncome,
 		UnpaidVacationDays: unpaidVacationDays,
@@ -127,6 +136,12 @@ func (app *application) calculateSalaryWithBenefits(
 	exchangeRate float64,
 	fiscalYear database.FiscalYear,
 ) (database.SalaryCalculation, error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start).Seconds()
+		metrics.TotalCompCalculations.Inc()
+		metrics.CalculationDuration.Observe(duration)
+	}()
 	
 	// Calculate monthly first
 	result, err := app.calculateSalary(grossMonthlySalary, 1, fiscalYear)
