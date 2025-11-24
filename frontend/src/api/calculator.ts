@@ -72,12 +72,41 @@ export interface ComparisonRequest {
 export interface ComparisonResponse {
   results: Array<{
     package_name: string
-    calculation: SalaryCalculation
+    gross_salary: number
+    net_salary: number
+    isr_tax: number
+    subsidio_empleo: number
+    imss_worker: number
+    fondo_ahorro_employee: number
+    vales_despensa_monthly: number
+    sbc: number
+    yearly_gross_base: number
+    yearly_gross: number
+    yearly_net: number
+    monthly_adjusted: number
+    aguinaldo_gross?: number
+    aguinaldo_isr?: number
+    aguinaldo_net?: number
+    prima_vacacional_gross?: number
+    prima_vacacional_isr?: number
+    prima_vacacional_net?: number
+    fondo_ahorro_yearly?: number
+    infonavit_employer_annual?: number
+    imss_employer_annual?: number
+    unpaid_vacation_days?: number
+    unpaid_vacation_loss?: number
+    has_infonavit_credit?: boolean
+    other_benefits?: Array<{
+      name: string
+      amount: number
+      isr: number
+      net: number
+      tax_free: boolean
+      cadence: string
+    }>
+    equity_config?: any
+    equity_schedule?: any[]
   }>
-  best_package: {
-    package_name: string
-    calculation: SalaryCalculation
-  }
   fiscal_year: {
     year: number
     uma_monthly: number
