@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import PackageForm from '../components/PackageForm'
+import ResultsSection from '../components/ResultsSection'
 import { calculatorAPI, PackageInput, ComparisonResponse } from '../api/calculator'
 
 export default function HomePage() {
@@ -9,18 +11,49 @@ export default function HomePage() {
       currency: 'MXN',
       payment_frequency: 'monthly',
       gross_monthly_salary: 0,
-    },
-    {
-      name: 'Paquete 2',
-      regime: 'sueldos_salarios',
-      currency: 'MXN',
-      payment_frequency: 'monthly',
-      gross_monthly_salary: 0,
+      hours_per_week: 40,
+      has_aguinaldo: true,
+      aguinaldo_days: 15,
+      has_vales_despensa: true,
+      vales_despensa_amount: 3439,
+      has_prima_vacacional: true,
+      vacation_days: 12,
+      prima_vacacional_percent: 25,
+      has_fondo_ahorro: true,
+      fondo_ahorro_percent: 13,
+      unpaid_vacation_days: 0,
+      has_equity: false,
+      initial_equity_usd: 0,
+      has_refreshers: false,
+      refresher_min_usd: 0,
+      refresher_max_usd: 0,
+      other_benefits: [],
     },
   ])
+
+  const [comparisonMode, setComparisonMode] = useState(false)
   const [results, setResults] = useState<ComparisonResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fiscalYear, setFiscalYear] = useState<any>(null)
+
+  useEffect(() => {
+    // Fetch fiscal year data on mount
+    const fetchFiscalYear = async () => {
+      try {
+        // This would ideally come from an API, but for now we'll use a default
+        setFiscalYear({
+          year: 2025,
+          usd_mxn_rate: 20.0,
+          uma: 3439.46,
+          smg: 278.80,
+        })
+      } catch (err) {
+        console.error('Error fetching fiscal year:', err)
+      }
+    }
+    fetchFiscalYear()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +61,8 @@ export default function HomePage() {
     setError(null)
 
     try {
-      const response = await calculatorAPI.comparePackages({ packages })
+      const packagesToSubmit = comparisonMode ? packages : [packages[0]]
+      const response = await calculatorAPI.comparePackages({ packages: packagesToSubmit })
       setResults(response)
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al calcular las compensaciones')
@@ -37,270 +71,272 @@ export default function HomePage() {
     }
   }
 
-  const handleExportPDF = async () => {
-    try {
-      const blob = await calculatorAPI.exportPDF()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'TotalComp_Comparacion_2025.pdf'
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (err) {
-      console.error('Error exporting PDF:', err)
+  const handleClear = () => {
+    if (!window.confirm('¿Estás seguro de que quieres limpiar todos los campos?')) {
+      return
     }
+    setResults(null)
+    setPackages([
+      {
+        name: 'Paquete 1',
+        regime: 'sueldos_salarios',
+        currency: 'MXN',
+        payment_frequency: 'monthly',
+        gross_monthly_salary: 0,
+        hours_per_week: 40,
+        has_aguinaldo: true,
+        aguinaldo_days: 15,
+        has_vales_despensa: true,
+        vales_despensa_amount: 3439,
+        has_prima_vacacional: true,
+        vacation_days: 12,
+        prima_vacacional_percent: 25,
+        has_fondo_ahorro: true,
+        fondo_ahorro_percent: 13,
+        unpaid_vacation_days: 0,
+        has_equity: false,
+        initial_equity_usd: 0,
+        has_refreshers: false,
+        refresher_min_usd: 0,
+        refresher_max_usd: 0,
+        other_benefits: [],
+      },
+    ])
+    setComparisonMode(false)
   }
 
-  const handleClear = async () => {
-    try {
-      await calculatorAPI.clearSession()
-      setResults(null)
+  const addComparisonPackage = () => {
+    setComparisonMode(true)
+    if (packages.length === 1) {
       setPackages([
-        {
-          name: 'Paquete 1',
-          regime: 'sueldos_salarios',
-          currency: 'MXN',
-          payment_frequency: 'monthly',
-          gross_monthly_salary: 0,
-        },
+        ...packages,
         {
           name: 'Paquete 2',
           regime: 'sueldos_salarios',
           currency: 'MXN',
           payment_frequency: 'monthly',
           gross_monthly_salary: 0,
+          hours_per_week: 40,
+          has_aguinaldo: true,
+          aguinaldo_days: 15,
+          has_vales_despensa: true,
+          vales_despensa_amount: 3439,
+          has_prima_vacacional: true,
+          vacation_days: 12,
+          prima_vacacional_percent: 25,
+          has_fondo_ahorro: true,
+          fondo_ahorro_percent: 13,
+          unpaid_vacation_days: 0,
+          has_equity: false,
+          initial_equity_usd: 0,
+          has_refreshers: false,
+          refresher_min_usd: 0,
+          refresher_max_usd: 0,
+          other_benefits: [],
         },
       ])
-    } catch (err) {
-      console.error('Error clearing session:', err)
     }
   }
 
-  const updatePackage = (index: number, field: keyof PackageInput, value: any) => {
+  const removeComparison = () => {
+    setComparisonMode(false)
+    setPackages([packages[0]])
+  }
+
+  const updatePackage = (index: number, updatedPackage: PackageInput) => {
     const newPackages = [...packages]
-    newPackages[index] = { ...newPackages[index], [field]: value }
+    newPackages[index] = updatedPackage
     setPackages(newPackages)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-    }).format(amount)
-  }
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Compara Paquetes de Compensación
+    <div style={{ width: '100%', padding: '1.5rem', boxSizing: 'border-box' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '2rem', maxWidth: '780px', marginLeft: 'auto', marginRight: 'auto' }}>
+        <h1 style={{ fontSize: '2.5rem', color: '#0f172a', marginBottom: '0.75rem', marginTop: 0, fontWeight: 700 }}>
+          💰 Calculadora de Sueldo & Comparador
         </h1>
-        <p className="text-xl text-gray-600">
-          Calcula y compara compensaciones totales incluyendo salario, prestaciones e impuestos
+        <p style={{ fontSize: '1.25rem', color: '#10b981', margin: '0 0 0.5rem 0', fontWeight: 600 }}>
+          Tu salario real, sin letras chiquitas
+        </p>
+        <p style={{ fontSize: '0.875rem', color: '#6366f1', margin: '0 0 0.5rem 0', fontWeight: 500, fontStyle: 'italic' }}>
+          Ideal para Ingenieros, Freelancers y Contractors.
+        </p>
+        <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0 }}>
+          Compara ofertas laborales lado a lado • Sueldos y Salarios vs RESICO • ISR 2025 • IMSS • UMA • Prestaciones
         </p>
       </div>
 
-      {!results ? (
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {packages.map((pkg, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">
-                  <input
-                    type="text"
-                    value={pkg.name}
-                    onChange={(e) => updatePackage(index, 'name', e.target.value)}
-                    className="border-b border-gray-300 focus:border-primary-500 outline-none w-full"
-                  />
-                </h3>
+      {/* Form */}
+      <form onSubmit={handleSubmit} noValidate>
+        {/* Packages Wrapper */}
+        <div style={{ marginBottom: '2rem', position: 'relative' }}>
+          <div
+            style={{
+              display: comparisonMode ? 'grid' : 'block',
+              gridTemplateColumns: comparisonMode ? 'repeat(auto-fit, minmax(400px, 1fr))' : '1fr',
+              gap: '1.5rem',
+              width: comparisonMode ? 'auto' : '780px',
+              maxWidth: comparisonMode ? '100%' : '780px',
+              margin: '0 auto',
+            }}
+          >
+            <PackageForm
+              package={packages[0]}
+              index={0}
+              borderColor="#3b82f6"
+              showRemoveButton={false}
+              fiscalYear={fiscalYear}
+              onChange={(updatedPackage) => updatePackage(0, updatedPackage)}
+            />
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Régimen
-                    </label>
-                    <select
-                      value={pkg.regime}
-                      onChange={(e) => updatePackage(index, 'regime', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    >
-                      <option value="sueldos_salarios">Sueldos y Salarios</option>
-                      <option value="resico">RESICO</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Salario Mensual Bruto
-                    </label>
-                    <input
-                      type="number"
-                      value={pkg.gross_monthly_salary || ''}
-                      onChange={(e) => updatePackage(index, 'gross_monthly_salary', parseFloat(e.target.value) || 0)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Moneda
-                    </label>
-                    <select
-                      value={pkg.currency}
-                      onChange={(e) => updatePackage(index, 'currency', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
-                    >
-                      <option value="MXN">MXN</option>
-                      <option value="USD">USD</option>
-                    </select>
-                  </div>
-
-                  {pkg.regime === 'sueldos_salarios' && (
-                    <>
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={pkg.has_aguinaldo || false}
-                          onChange={(e) => updatePackage(index, 'has_aguinaldo', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">Aguinaldo</label>
-                      </div>
-
-                      {pkg.has_aguinaldo && (
-                        <input
-                          type="number"
-                          placeholder="Días de aguinaldo"
-                          value={pkg.aguinaldo_days || 15}
-                          onChange={(e) => updatePackage(index, 'aguinaldo_days', parseInt(e.target.value))}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                      )}
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={pkg.has_prima_vacacional || false}
-                          onChange={(e) => updatePackage(index, 'has_prima_vacacional', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">Prima Vacacional</label>
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={pkg.has_vales_despensa || false}
-                          onChange={(e) => updatePackage(index, 'has_vales_despensa', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">Vales de Despensa</label>
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={pkg.has_fondo_ahorro || false}
-                          onChange={(e) => updatePackage(index, 'has_fondo_ahorro', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label className="text-sm text-gray-700">Fondo de Ahorro</label>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
+            {comparisonMode && packages[1] && (
+              <PackageForm
+                package={packages[1]}
+                index={1}
+                borderColor="#8b5cf6"
+                showRemoveButton={true}
+                fiscalYear={fiscalYear}
+                onChange={(updatedPackage) => updatePackage(1, updatedPackage)}
+                onRemove={removeComparison}
+              />
+            )}
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
-              {error}
+          {/* Add Comparison Button */}
+          {!comparisonMode && (
+            <div
+              style={{
+                display: 'flex',
+                position: 'absolute',
+                left: 'calc(50% + 390px + 1rem)',
+                top: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <button
+                type="button"
+                onClick={addComparisonPackage}
+                style={{
+                  writingMode: 'vertical-rl',
+                  textOrientation: 'mixed',
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                  color: '#3b82f6',
+                  padding: '1.5rem 0.75rem',
+                  border: '2px dashed #3b82f6',
+                  borderRadius: '8px',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap',
+                  maxHeight: '420px',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'
+                  e.currentTarget.style.borderColor = '#2563eb'
+                  e.currentTarget.style.color = '#2563eb'
+                  e.currentTarget.style.borderStyle = 'solid'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'
+                  e.currentTarget.style.borderColor = '#3b82f6'
+                  e.currentTarget.style.color = '#3b82f6'
+                  e.currentTarget.style.borderStyle = 'dashed'
+                }}
+              >
+                <span style={{ fontSize: '1.1rem' }}>➕</span>
+                <span>Comparar con otro paquete de compensación</span>
+              </button>
             </div>
           )}
+        </div>
 
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-md font-medium disabled:opacity-50"
-            >
-              {loading ? 'Calculando...' : 'Comparar Paquetes'}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="space-y-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-6">Resultados de Comparación</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {results.results.map((result, index) => (
-                <div
-                  key={index}
-                  className={`border-2 rounded-lg p-6 ${
-                    result.package_name === results.best_package.package_name
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200'
-                  }`}
-                >
-                  <h3 className="text-xl font-semibold mb-4">
-                    {result.package_name}
-                    {result.package_name === results.best_package.package_name && (
-                      <span className="ml-2 text-sm text-green-600 font-normal">
-                        Mejor Opción
-                      </span>
-                    )}
-                  </h3>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Salario Bruto Mensual:</span>
-                      <span className="font-semibold">
-                        {formatCurrency(result.calculation.gross_salary)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Salario Neto Mensual:</span>
-                      <span className="font-semibold">
-                        {formatCurrency(result.calculation.net_salary)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">ISR:</span>
-                      <span className="text-red-600">
-                        -{formatCurrency(result.calculation.isr_tax)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t pt-3">
-                      <span className="text-gray-900 font-medium">Compensación Anual Neta:</span>
-                      <span className="font-bold text-lg text-primary-600">
-                        {formatCurrency(result.calculation.yearly_net)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        {/* Validation Errors */}
+        {error && (
+          <div style={{ background: '#fee2e2', borderLeft: '4px solid #ef4444', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <div>
+                <div style={{ fontWeight: 700, color: '#991b1b', marginBottom: '0.25rem' }}>Error de validación</div>
+                <div style={{ color: '#991b1b' }}>{error}</div>
+              </div>
             </div>
           </div>
+        )}
 
-          <div className="flex justify-center space-x-4">
-            <button
-              onClick={handleExportPDF}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-md font-medium"
-            >
-              Exportar PDF
-            </button>
-            <button
-              onClick={handleClear}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-md font-medium"
-            >
-              Nueva Comparación
-            </button>
-          </div>
+        {/* Submit Button */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              padding: '1rem 3rem',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 6px 12px rgba(16, 185, 129, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              marginRight: '1rem',
+              opacity: loading ? 0.7 : 1,
+            }}
+            onMouseOver={(e) => {
+              if (!loading) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.4)'
+              }
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.3)'
+            }}
+          >
+            {loading ? 'Calculando...' : '💰 Calcular Compensación'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              padding: '1rem 2rem',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 4px 8px rgba(239, 68, 68, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(239, 68, 68, 0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(239, 68, 68, 0.3)'
+            }}
+          >
+            🗑️ Limpiar Todo
+          </button>
+        </div>
+      </form>
+
+      {/* Results Section */}
+      {results && <ResultsSection results={results} fiscalYear={fiscalYear} />}
+
+      {/* Info Box */}
+      {results && (
+        <div style={{ background: '#eff6ff', borderLeft: '4px solid #2563eb', padding: '1.25rem', borderRadius: '8px', fontSize: '0.875rem', color: '#1e40af' }}>
+          <strong>💡 Tip:</strong> El "Neto Mensual Ajustado" incluye las prestaciones anuales divididas entre 12 meses. Es una mejor métrica para comparar tu poder adquisitivo real.
         </div>
       )}
     </div>
