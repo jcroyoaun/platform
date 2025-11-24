@@ -56,6 +56,19 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: compensacion-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:3080
+    depends_on:
+      - app
+    restart: unless-stopped
+
 volumes:
   postgres_data:
 
